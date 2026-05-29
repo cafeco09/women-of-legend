@@ -3,8 +3,8 @@
 <head>
   <meta charset="utf-8"/>
   <meta name="viewport" content="width=device-width,initial-scale=1"/>
-  <title>Women of Legend · v4 Bigger Map</title>
-  <!-- v4-bigger-map: quote top strip, compact title, larger map, desktop layout protected from tablet breakpoint -->
+  <title>Women of Legend · v5 Stable Map</title>
+  <!-- v5-stable-map: fixed JS image fallback bug, restored map rendering, compact quote/title, larger map -->
 
   <script src="https://cdn.jsdelivr.net/npm/d3@7"></script>
   <script src="https://cdn.jsdelivr.net/npm/topojson-client@3"></script>
@@ -121,7 +121,7 @@
       transition:opacity 1.1s ease,transform 1.1s ease;
     }
 
-    .quote-text.show,.quote-author.show{
+    .quote-text,.quote-author,.quote-text.show,.quote-author.show{
       opacity:1;
       transform:translateY(0);
     }
@@ -161,7 +161,20 @@
       inset:0;
       width:100%;
       height:100%;
+      z-index:2;
+    }
+
+    .map-loading{
+      position:absolute;
+      inset:0;
       z-index:1;
+      display:grid;
+      place-items:center;
+      color:rgba(255,255,255,.42);
+      font-family:Georgia,serif;
+      font-size:34px;
+      letter-spacing:-.04em;
+      pointer-events:none;
     }
 
     .country{
@@ -564,8 +577,8 @@
   <main class="frame">
     <section class="quote">
       <small>Voices on women’s rights</small>
-      <div id="quoteText" class="quote-text"></div>
-      <div id="quoteAuthor" class="quote-author"></div>
+      <div id="quoteText" class="quote-text">“Women belong in all places where decisions are being made.”</div>
+      <div id="quoteAuthor" class="quote-author">— Ruth Bader Ginsburg</div>
     </section>
 
     <section class="brand">
@@ -573,7 +586,7 @@
       <p>Folklore, resistance and women’s agency across continents. Click a portrait to open the story layer.</p>
     </section>
 
-    <svg id="map" aria-label="World map"></svg>
+    <div class="map-loading">Loading map…</div>\n    <svg id="map" aria-label="World map"></svg>
     <div id="markerLayer" class="marker-layer"></div>
 
     <article id="story" class="story">
@@ -604,7 +617,7 @@
     </section>
 
     <section class="bottom">
-      <div class="legend"><span class="dot"></span><span>v4 layout · Portraits sit on country coordinates. Highlighted countries are active story locations.</span></div>
+      <div class="legend"><span class="dot"></span><span>v5 stable · Portraits sit on country coordinates. Highlighted countries are active story locations.</span></div>
       <div id="filters" class="filters"></div>
     </section>
   </main>
@@ -707,7 +720,11 @@ function makeFilters(){
 
 function openStory(s){
   activeStory=s;
-  storyImg.onerror=function(){ this.onerror=null; this.src=`assets/faces/${s.id === 'lakshmibai' ? 'rani-lakshmibai' : s.id}.svg`; };
+  storyImg.onerror=function(){
+    const fallbackName = s.id === "lakshmibai" ? "rani-lakshmibai" : s.id;
+    this.onerror = null;
+    this.src = `assets/faces/${fallbackName}.svg`;
+  };
   storyImg.src=s.image;
   storyEra.textContent=s.era;
   storyName.textContent=s.name;
@@ -758,6 +775,7 @@ function rotateQuotes(){
 }
 
 async function render(){
+  try {
   const frame=document.querySelector(".frame");
   const w=frame.clientWidth;
   const h=frame.clientHeight;
@@ -798,13 +816,26 @@ async function render(){
     m.innerHTML=`
       <div class="pulse"></div>
       <button aria-label="${s.name}">
-        <img src="${s.image}" alt="${s.name}" onerror="this.onerror=null; this.src=`assets/faces/${s.id === 'lakshmibai' ? 'rani-lakshmibai' : s.id}.svg`;">
+        <img src="${s.image}" alt="${s.name}">
       </button>
       <div class="label">${s.name}</div>
     `;
+
+    const markerImg = m.querySelector("img");
+    markerImg.addEventListener("error", () => {
+      const fallbackName = s.id === "lakshmibai" ? "rani-lakshmibai" : s.id;
+      markerImg.src = `assets/faces/${fallbackName}.svg`;
+    }, { once: true });
+
     m.querySelector("button").onclick=()=>openStory(s);
     markerLayer.appendChild(m);
   });
+  document.querySelector(".map-loading").style.display = "none";
+  } catch (err) {
+    console.error("Map failed to render:", err);
+    const loading = document.querySelector(".map-loading");
+    if (loading) loading.textContent = "Map failed to load. Check console/CDN.";
+  }
 }
 
 makeFilters();
