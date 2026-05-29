@@ -3,7 +3,8 @@
 <head>
   <meta charset="utf-8"/>
   <meta name="viewport" content="width=device-width,initial-scale=1"/>
-  <title>Women of Legend</title>
+  <title>Women of Legend · v4 Bigger Map</title>
+  <!-- v4-bigger-map: quote top strip, compact title, larger map, desktop layout protected from tablet breakpoint -->
 
   <script src="https://cdn.jsdelivr.net/npm/d3@7"></script>
   <script src="https://cdn.jsdelivr.net/npm/topojson-client@3"></script>
@@ -73,21 +74,21 @@
       background:linear-gradient(145deg,rgba(255,255,255,.10),transparent 20%,transparent 82%,rgba(255,255,255,.06));
     }
 
-    /* Quote strip sits above everything and stays compact */
+    /* v4: slim quote strip at the very top */
     .quote{
       position:absolute;
       z-index:34;
-      top:14px;
+      top:10px;
       left:50%;
       transform:translateX(-50%);
-      width:min(980px, calc(100% - 36px));
-      min-height:72px;
-      padding:11px 16px;
-      border-radius:18px;
+      width:min(780px, calc(100% - 36px));
+      min-height:52px;
+      padding:8px 13px;
+      border-radius:15px;
       border:1px solid var(--stroke);
-      background:linear-gradient(180deg,rgba(12,53,109,.78),rgba(4,20,46,.54));
+      background:linear-gradient(180deg,rgba(12,53,109,.70),rgba(4,20,46,.46));
       backdrop-filter:blur(16px);
-      box-shadow:0 16px 44px rgba(0,0,0,.22);
+      box-shadow:0 12px 34px rgba(0,0,0,.18);
     }
 
     .quote small{
@@ -95,28 +96,28 @@
       text-transform:uppercase;
       letter-spacing:.14em;
       color:#a6d9ff;
-      font-size:10px;
+      font-size:8.5px;
       font-weight:900;
-      margin-bottom:5px;
+      margin-bottom:4px;
     }
 
     .quote-text{
       font-family:Georgia,"Times New Roman",serif;
-      font-size:clamp(15px,1.18vw,22px);
-      line-height:1.2;
-      min-height:27px;
+      font-size:clamp(13px,.96vw,18px);
+      line-height:1.12;
+      min-height:20px;
       opacity:0;
-      transform:translateY(7px);
+      transform:translateY(6px);
       transition:opacity 1.1s ease,transform 1.1s ease;
     }
 
     .quote-author{
-      font-size:10.5px;
+      font-size:9.5px;
       color:#bcd9f4;
       font-weight:850;
-      margin-top:5px;
+      margin-top:3px;
       opacity:0;
-      transform:translateY(7px);
+      transform:translateY(6px);
       transition:opacity 1.1s ease,transform 1.1s ease;
     }
 
@@ -125,34 +126,34 @@
       transform:translateY(0);
     }
 
-    /* Smaller headline block, not full-width */
+    /* v4: compact title card so the map stays dominant */
     .brand{
       position:absolute;
       z-index:33;
-      top:96px;
+      top:70px;
       left:18px;
-      width:min(360px,28vw);
-      padding:12px 14px;
-      border-radius:18px;
+      width:min(300px,22vw);
+      padding:9px 12px;
+      border-radius:16px;
       border:1px solid var(--stroke);
-      background:linear-gradient(180deg,rgba(9,38,82,.76),rgba(4,20,46,.54));
+      background:linear-gradient(180deg,rgba(9,38,82,.66),rgba(4,20,46,.44));
       backdrop-filter:blur(16px);
-      box-shadow:0 16px 44px rgba(0,0,0,.22);
+      box-shadow:0 12px 34px rgba(0,0,0,.18);
     }
 
     .brand h1{
       margin:0;
       font-family:Georgia,"Times New Roman",serif;
-      font-size:clamp(24px,2.35vw,40px);
-      line-height:.95;
+      font-size:clamp(21px,1.9vw,32px);
+      line-height:.92;
       letter-spacing:-.055em;
     }
 
     .brand p{
-      margin:6px 0 0;
+      margin:5px 0 0;
       color:var(--muted);
-      font-size:12px;
-      line-height:1.4;
+      font-size:10.5px;
+      line-height:1.32;
     }
 
     #map{
@@ -191,15 +192,15 @@
 
     .marker{
       position:absolute;
-      width:48px;
-      height:48px;
+      width:40px;
+      height:40px;
       transform:translate(-50%,-50%);
       pointer-events:auto;
     }
 
     .marker button{
-      width:48px;
-      height:48px;
+      width:40px;
+      height:40px;
       border-radius:50%;
       padding:0;
       cursor:pointer;
@@ -248,7 +249,7 @@
     .label{
       position:absolute;
       left:50%;
-      top:52px;
+      top:44px;
       transform:translateX(-50%);
       white-space:nowrap;
       padding:4px 8px;
@@ -256,7 +257,7 @@
       background:rgba(3,20,46,.78);
       border:1px solid rgba(255,255,255,.12);
       color:#f4fbff;
-      font-size:10px;
+      font-size:9px;
       font-weight:900;
       opacity:0;
       transition:opacity .2s ease;
@@ -269,8 +270,8 @@
       position:absolute;
       z-index:32;
       right:18px;
-      bottom:68px;
-      width:min(380px,29vw);
+      bottom:58px;
+      width:min(340px,25vw);
       border-radius:20px;
       overflow:hidden;
       border:1px solid var(--stroke);
@@ -291,15 +292,15 @@
 
     .story-top{
       display:grid;
-      grid-template-columns:86px 1fr;
+      grid-template-columns:72px 1fr;
       gap:12px;
       padding:13px;
       border-bottom:1px solid rgba(255,255,255,.08);
     }
 
     .story-top img{
-      width:86px;
-      height:86px;
+      width:72px;
+      height:72px;
       border-radius:15px;
       object-fit:cover;
       background:#123969;
@@ -316,7 +317,7 @@
     .story h2{
       margin:6px 0 4px;
       font-family:Georgia,serif;
-      font-size:26px;
+      font-size:23px;
       line-height:.94;
       letter-spacing:-.05em;
     }
@@ -347,7 +348,7 @@
     }
 
     .tag{
-      font-size:10px;
+      font-size:9px;
       font-weight:850;
       padding:6px 9px;
       border-radius:9px;
@@ -436,7 +437,7 @@
       z-index:31;
       left:18px;
       right:18px;
-      bottom:14px;
+      bottom:10px;
       display:flex;
       justify-content:space-between;
       align-items:flex-end;
@@ -447,14 +448,14 @@
       display:flex;
       align-items:center;
       gap:8px;
-      max-width:320px;
-      padding:9px 11px;
+      max-width:260px;
+      padding:7px 9px;
       border-radius:14px;
       border:1px solid var(--stroke);
       background:rgba(3,22,51,.56);
       backdrop-filter:blur(14px);
       color:var(--muted);
-      font-size:10px;
+      font-size:9px;
       font-weight:850;
     }
 
@@ -475,7 +476,7 @@
     }
 
     .filters button{
-      padding:7px 11px;
+      padding:6px 9px;
       border-radius:999px;
       border:1px solid rgba(255,255,255,.16);
       background:linear-gradient(180deg,rgba(19,72,135,.76),rgba(7,35,78,.76));
@@ -490,7 +491,7 @@
       background:linear-gradient(180deg,rgba(100,190,255,.38),rgba(28,98,176,.9));
     }
 
-    @media(max-width:980px){
+    @media(max-width:700px){
       .quote{
         top:10px;
         left:14px;
@@ -506,7 +507,7 @@
       }
 
       .brand{
-        top:86px;
+        top:72px;
         left:14px;
         width:calc(100% - 28px);
         max-width:none;
@@ -545,7 +546,7 @@
       .app{padding:8px}
       .frame{border-radius:20px}
       .quote{top:8px;left:8px;right:8px;padding:10px 12px}
-      .brand{top:104px;left:8px;width:calc(100% - 16px);padding:10px 12px}
+      .brand{top:76px;left:8px;width:calc(100% - 16px);padding:10px 12px}
       .brand h1{font-size:28px}
       .brand p{font-size:11.5px}
       .bottom{left:8px;right:8px;bottom:8px}
@@ -603,7 +604,7 @@
     </section>
 
     <section class="bottom">
-      <div class="legend"><span class="dot"></span><span>Portraits sit on country coordinates. Highlighted countries are active story locations.</span></div>
+      <div class="legend"><span class="dot"></span><span>v4 layout · Portraits sit on country coordinates. Highlighted countries are active story locations.</span></div>
       <div id="filters" class="filters"></div>
     </section>
   </main>
@@ -628,19 +629,19 @@ const stories=[
 
 {id:"mulan",name:"Hua Mulan",country:"China",continent:"Asia",coords:[104.19,35.86],iso:"156",era:"Ballad of Mulan",image:"assets/faces/mulan.svg",tags:["Legend","Duty","Courage"],summary:"Mulan takes her father’s place in war, unsettling assumptions about gender and public duty.",body:"Mulan is not a modern rights activist, but her story is potent because it exposes the fragility of the idea that courage, duty and sacrifice belong naturally to men."},
 {id:"trung",name:"Trưng Sisters",country:"Vietnam",continent:"Asia",coords:[105.83,21.03],iso:"704",era:"Rebellion Leaders",image:"assets/faces/trung-sisters.svg",tags:["Rebellion","Sovereignty","Leadership"],summary:"The Trưng Sisters led rebellion against Han domination and became symbols of Vietnamese independence.",body:"The Trưng Sisters fuse female leadership with national freedom. Their story matters because it challenges the assumption that anti-imperial struggle is fundamentally masculine."},
-{id:"lakshmibai",name:"Rani Lakshmibai",country:"India",continent:"Asia",coords:[78.57,25.45],iso:"356",era:"Queen of Jhansi",image:"assets/faces/rani-lakshmibai.svg",tags:["Rebellion","Sovereignty","Courage"],summary:"Rani Lakshmibai is remembered as a queen who fought colonial annexation during the 1857 uprising.",body:"Lakshmibai’s memory lives through poetry and public legend. She represents sovereignty, maternal strength, political legitimacy and the refusal to accept colonial rule."},
+{id:"lakshmibai",name:"Rani Lakshmibai",country:"India",continent:"Asia",coords:[78.57,25.45],iso:"356",era:"Queen of Jhansi",image:"https://commons.wikimedia.org/wiki/Special:FilePath/Rani_Lakshmibai_contemporary_portrait.jpg",tags:["Rebellion","Sovereignty","Courage"],summary:"Rani Lakshmibai is remembered as a queen who fought colonial annexation during the 1857 uprising.",body:"Lakshmibai’s memory lives through poetry and public legend. She represents sovereignty, maternal strength, political legitimacy and the refusal to accept colonial rule."},
 {id:"tomoe",name:"Tomoe Gozen",country:"Japan",continent:"Asia",coords:[138.25,36.20],iso:"392",era:"Warrior of the Heike",image:"assets/faces/tomoe-gozen.svg",tags:["Warrior","Legend","Honour"],summary:"Tomoe Gozen is remembered as a woman warrior associated with battlefield skill and martial honour.",body:"Tomoe Gozen sits between literature and history. Her symbolic power lies in demonstrating that courage, combat and honour were not exclusively male domains."},
 {id:"gabriela",name:"Gabriela Silang",country:"Philippines",continent:"Asia",coords:[120.98,14.60],iso:"608",era:"Revolutionary Leader",image:"assets/faces/gabriela-silang.svg",tags:["Revolt","Anti-colonial","Leadership"],summary:"Gabriela Silang took command of revolt and became a symbol of revolutionary female leadership.",body:"Gabriela Silang’s story is more than personal courage after loss. It represents a woman’s movement into command, organisation and public rebellion."},
 
 {id:"boudicca",name:"Boudicca",country:"Britain",continent:"Europe",coords:[0.12,52.20],iso:"826",era:"Iceni Queen",image:"assets/faces/boudicca.svg",tags:["Revolt","Justice","Sovereignty"],summary:"Boudicca led revolt against Roman rule after violence against her family and people.",body:"Boudicca’s story has been repeatedly retold and politicised, yet its central force remains clear: a woman refuses imperial humiliation and turns private injury into collective resistance."},
-{id:"joan",name:"Joan of Arc",country:"France",continent:"Europe",coords:[2.21,46.23],iso:"250",era:"Saint and Soldier",image:"assets/faces/joan.svg",tags:["Faith","War","Mythologised"],summary:"Joan of Arc became a symbol of courage, divine conviction and national liberation.",body:"Joan of Arc matters because she crossed class, gender and political boundaries. A peasant girl claimed authority and changed the course of history as remembered by later generations."},
+{id:"joan",name:"Joan of Arc",country:"France",continent:"Europe",coords:[2.21,46.23],iso:"250",era:"Saint and Soldier",image:"https://commons.wikimedia.org/wiki/Special:FilePath/Joan_of_arc.png",tags:["Faith","War","Mythologised"],summary:"Joan of Arc became a symbol of courage, divine conviction and national liberation.",body:"Joan of Arc matters because she crossed class, gender and political boundaries. A peasant girl claimed authority and changed the course of history as remembered by later generations."},
 {id:"grace",name:"Grace O’Malley",country:"Ireland",continent:"Europe",coords:[-9.06,53.80],iso:"372",era:"Pirate Queen",image:"assets/faces/grace-omalley.svg",tags:["Sea Power","Autonomy","Leadership"],summary:"Grace O’Malley is remembered as a sea captain and clan leader who defended autonomy.",body:"Grace O’Malley’s legend is about command, negotiation and maritime power. She shows women’s authority in a domain usually imagined as male."},
 {id:"maria",name:"María Pita",country:"Spain",continent:"Europe",coords:[-8.41,43.36],iso:"724",era:"Defender of A Coruña",image:"assets/faces/maria-pita.svg",tags:["Defence","Civic Courage","Memory"],summary:"María Pita is remembered for defending A Coruña and becoming a symbol of civic courage.",body:"María Pita represents the ordinary woman transformed into a civic legend. She embodies public action, courage and communal defence."},
 {id:"brites",name:"Brites de Almeida",country:"Portugal",continent:"Europe",coords:[-8.22,39.66],iso:"620",era:"The Baker of Aljubarrota",image:"assets/faces/brites.svg",tags:["Folklore","Resistance","Working Woman"],summary:"Brites de Almeida is a legendary baker said to have fought invaders.",body:"Brites de Almeida’s appeal lies in her ordinariness. She is not remembered as elite, but as a working woman elevated by folklore into a national symbol."},
 
 {id:"adelita",name:"La Adelita",country:"Mexico",continent:"North America",coords:[-102.55,23.63],iso:"484",era:"Soldadera Symbol",image:"assets/faces/adelita.svg",tags:["Revolution","Song","Contested Memory"],summary:"La Adelita symbolises women’s participation in the Mexican Revolution, though often through romanticised memory.",body:"La Adelita stands for the soldaderas who fought, nursed, supplied and endured the revolution. The symbol is powerful, but it should not erase the hardship those women faced."},
 {id:"nanny",name:"Nanny of the Maroons",country:"Jamaica",continent:"North America",coords:[-77.30,18.10],iso:"388",era:"Maroon Leader",image:"assets/faces/nanny.svg",tags:["Freedom","Anti-slavery","Oral Tradition"],summary:"Nanny of the Maroons is remembered for guerrilla leadership and anti-slavery resistance.",body:"Nanny’s place in memory is central because it puts a Black woman at the heart of freedom, strategy and communal survival."},
-{id:"tubman",name:"Harriet Tubman",country:"United States",continent:"North America",coords:[-76.08,38.88],iso:"840",era:"Moses of Her People",image:"assets/faces/harriet-tubman.svg",tags:["Freedom","Abolition","Suffrage"],summary:"Harriet Tubman became a freedom legend through escape, rescue, abolitionist work and suffrage support.",body:"Tubman transformed survival into organised liberation. She represents movement, bodily autonomy, abolition and later women’s political voice."},
+{id:"tubman",name:"Harriet Tubman",country:"United States",continent:"North America",coords:[-76.08,38.88],iso:"840",era:"Moses of Her People",image:"https://commons.wikimedia.org/wiki/Special:FilePath/Harriet_Tubman_portrait.jpg",tags:["Freedom","Abolition","Suffrage"],summary:"Harriet Tubman became a freedom legend through escape, rescue, abolitionist work and suffrage support.",body:"Tubman transformed survival into organised liberation. She represents movement, bodily autonomy, abolition and later women’s political voice."},
 {id:"thanadelthur",name:"Thanadelthur",country:"Canada",continent:"North America",coords:[-96.82,58.77],iso:"124",era:"Dene Diplomat",image:"assets/faces/thanadelthur.svg",tags:["Diplomacy","Peace","Survival"],summary:"Thanadelthur is remembered as a Dene woman who escaped captivity and became a diplomat and peace-maker.",body:"Thanadelthur expands the frame beyond warriors. Her story foregrounds translation, survival and political intelligence."},
 {id:"anacaona",name:"Anacaona",country:"Haiti",continent:"North America",coords:[-72.29,18.97],iso:"332",era:"Taíno Cacica",image:"assets/faces/anacaona.svg",tags:["Indigenous Rule","Colonial Violence","Memory"],summary:"Anacaona is remembered as a Taíno ruler and cultural figure under colonial violence.",body:"Anacaona links women’s leadership to Indigenous sovereignty and the trauma of conquest. Her memory is both political and poetic."},
 
@@ -706,6 +707,7 @@ function makeFilters(){
 
 function openStory(s){
   activeStory=s;
+  storyImg.onerror=function(){ this.onerror=null; this.src=`assets/faces/${s.id === 'lakshmibai' ? 'rani-lakshmibai' : s.id}.svg`; };
   storyImg.src=s.image;
   storyEra.textContent=s.era;
   storyName.textContent=s.name;
@@ -766,7 +768,7 @@ async function render(){
 
   /* Larger map: more width and height, less vertical padding */
   const projection=d3.geoNaturalEarth1()
-    .fitExtent([[24,78],[w-24,h-74]],{type:"Sphere"});
+    .fitExtent([[10,42],[w-10,h-42]],{type:"Sphere"});
 
   const path=d3.geoPath(projection);
   const world=await d3.json("https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json");
@@ -796,7 +798,7 @@ async function render(){
     m.innerHTML=`
       <div class="pulse"></div>
       <button aria-label="${s.name}">
-        <img src="${s.image}" alt="${s.name}">
+        <img src="${s.image}" alt="${s.name}" onerror="this.onerror=null; this.src=`assets/faces/${s.id === 'lakshmibai' ? 'rani-lakshmibai' : s.id}.svg`;">
       </button>
       <div class="label">${s.name}</div>
     `;
