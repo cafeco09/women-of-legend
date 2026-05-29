@@ -3,142 +3,917 @@
 <head>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
-<title>Women of Legend · v7 Atlas</title>
+<title>Women of Legend · v8 No Overlap Atlas</title>
 <script src="https://cdn.jsdelivr.net/npm/d3@7"></script>
 <script src="https://cdn.jsdelivr.net/npm/topojson-client@3"></script>
 <style>
-:root{
-  --stroke:rgba(255,255,255,.16);
-  --muted:#c7dbee;
-  --shadow:0 24px 80px rgba(0,0,0,.28);
+:root {
+  --stroke: rgba(255,255,255,.16);
+  --muted: #c7dbee;
+  --shadow: 0 22px 70px rgba(0,0,0,.25);
 }
-*{box-sizing:border-box}
-html,body{
-  margin:0; width:100%; height:100%; overflow:hidden; color:#fff;
-  font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
-  background:linear-gradient(135deg,#08264b 0%, #0d457f 46%, #2f79b8 100%);
+
+* { box-sizing: border-box; }
+
+html, body {
+  margin: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  color: white;
+  font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  background:
+    radial-gradient(circle at 18% 18%, rgba(255,255,255,.12), transparent 22%),
+    linear-gradient(135deg,#08264b 0%, #0d457f 46%, #2f79b8 100%);
 }
-body:before{content:""; position:fixed; inset:0; pointer-events:none; opacity:.34; background:radial-gradient(circle at 18% 18%, rgba(255,255,255,.18), transparent 24%), radial-gradient(circle at 76% 22%, rgba(255,255,255,.12), transparent 20%);}
-.app{width:100vw; height:100vh; padding:14px;}
-.frame{position:relative; width:100%; height:100%; overflow:hidden; border-radius:28px; border:1px solid rgba(255,255,255,.2); background:linear-gradient(180deg,rgba(8,35,72,.86),rgba(4,19,43,.94)); box-shadow:var(--shadow), inset 0 1px 0 rgba(255,255,255,.14);}
-.frame:after{content:""; position:absolute; inset:0; pointer-events:none; background:linear-gradient(145deg,rgba(255,255,255,.08),transparent 20%,transparent 84%,rgba(255,255,255,.05));}
 
-.topbar{position:absolute; z-index:40; top:10px; left:14px; right:14px; display:grid; grid-template-columns:1fr auto; gap:8px; align-items:start;}
-.quote{min-height:44px; padding:7px 12px; border-radius:14px; border:1px solid var(--stroke); background:linear-gradient(180deg,rgba(8,50,102,.68),rgba(3,18,40,.42)); backdrop-filter:blur(14px); box-shadow:0 10px 30px rgba(0,0,0,.16);}
-.quote small{display:block; text-transform:uppercase; letter-spacing:.14em; color:#9ed5ff; font-size:8px; font-weight:900; margin-bottom:2px;}
-.quote-text{font-family:Georgia,serif; font-size:clamp(12px,.86vw,16px); line-height:1.1; min-height:16px; transition:opacity 1s ease, transform 1s ease;}
-.quote-author{font-size:9px; color:#c6dff4; font-weight:800; margin-top:2px; transition:opacity 1s ease, transform 1s ease;}
-.fade{opacity:0!important; transform:translateY(5px);}
-.tabs{display:flex; gap:6px; padding:6px; border-radius:14px; border:1px solid var(--stroke); background:linear-gradient(180deg,rgba(8,50,102,.68),rgba(3,18,40,.42)); backdrop-filter:blur(14px); box-shadow:0 10px 30px rgba(0,0,0,.16);}
-.tab-btn,.filters button,.read{border:1px solid rgba(255,255,255,.14); background:rgba(255,255,255,.06); color:#e6f3ff; border-radius:999px; padding:7px 11px; font-size:10px; font-weight:900; cursor:pointer;}
-.tab-btn.active,.filters button.active{color:#fff; background:linear-gradient(180deg,rgba(116,195,255,.42),rgba(29,99,173,.92));}
+.app {
+  width: 100vw;
+  height: 100vh;
+  padding: 12px;
+}
 
-.brand{position:absolute; z-index:34; top:68px; left:14px; width:min(250px,19vw); padding:8px 11px; border-radius:14px; border:1px solid var(--stroke); background:linear-gradient(180deg,rgba(7,40,83,.62),rgba(3,18,40,.36)); backdrop-filter:blur(14px); box-shadow:0 10px 30px rgba(0,0,0,.16);}
-.brand h1{margin:0; font-family:Georgia,serif; font-size:clamp(19px,1.7vw,28px); line-height:.92; letter-spacing:-.05em;}
-.brand p{margin:4px 0 0; color:var(--muted); font-size:10px; line-height:1.28;}
+.frame {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  border-radius: 28px;
+  border: 1px solid rgba(255,255,255,.2);
+  background: linear-gradient(180deg, rgba(8,35,72,.86), rgba(4,19,43,.94));
+  box-shadow: var(--shadow), inset 0 1px 0 rgba(255,255,255,.14);
+  display: grid;
+  grid-template-rows: 54px 54px 1fr 46px;
+  gap: 8px;
+  padding: 12px;
+}
 
-#map{position:absolute; inset:0; width:100%; height:100%; z-index:2;}
-.map-loading{position:absolute; inset:0; display:grid; place-items:center; z-index:1; color:rgba(255,255,255,.34); font-family:Georgia,serif; font-size:28px; pointer-events:none;}
-.sea{fill:url(#seaGradient);}
-.land{fill:url(#landGradient); stroke:#d9e4d4; stroke-width:.55; vector-effect:non-scaling-stroke; filter:url(#shadowSoft);}
-.land.active{fill:url(#highlightGradient); stroke:#f9f3d4; stroke-width:.8;}
-.country-boundary{fill:none; stroke:rgba(255,255,255,.13); stroke-width:.35; vector-effect:non-scaling-stroke;}
-.graticule{fill:none; stroke:rgba(255,255,255,.08); stroke-width:.5;}
-.atlas-label{fill:rgba(240,246,255,.46); font-family:Georgia,serif; font-size:14px; letter-spacing:.08em; text-transform:uppercase;}
-.marker-layer{position:absolute; inset:0; z-index:20; pointer-events:none;}
-.marker{position:absolute; width:32px; height:32px; transform:translate(-50%,-50%); pointer-events:auto;}
-.marker button{width:32px; height:32px; border-radius:50%; padding:0; overflow:hidden; cursor:pointer; display:grid; place-items:center; border:1.6px solid rgba(255,255,255,.88); outline:1.6px solid rgba(122,197,255,.40); background:linear-gradient(145deg,rgba(133,208,255,.30),rgba(16,74,142,.90)); box-shadow:0 7px 18px rgba(0,0,0,.28), 0 0 10px rgba(95,184,255,.40);}
-.marker button:hover{transform:scale(1.1);}
-.marker img{width:100%; height:100%; object-fit:cover; display:block;}
-.pulse{position:absolute; inset:-5px; border-radius:50%; border:1px solid rgba(125,202,255,.26); animation:pulse 2.6s infinite; pointer-events:none;}
-@keyframes pulse{0%{transform:scale(.94);opacity:.8}72%{transform:scale(1.24);opacity:0}100%{opacity:0}}
-.label{position:absolute; left:50%; top:36px; transform:translateX(-50%); white-space:nowrap; padding:3px 7px; border-radius:999px; background:rgba(3,20,46,.78); border:1px solid rgba(255,255,255,.10); color:#f4fbff; font-size:8.5px; font-weight:900; opacity:0; transition:opacity .2s; pointer-events:none;}
-.marker:hover .label{opacity:1;}
+.topbar {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 8px;
+  min-height: 0;
+}
 
-.story{position:absolute; z-index:35; right:14px; bottom:50px; width:min(320px,24vw); border-radius:18px; overflow:hidden; border:1px solid var(--stroke); background:linear-gradient(180deg,rgba(8,37,80,.92),rgba(3,17,39,.90)); backdrop-filter:blur(14px); box-shadow:var(--shadow); opacity:0; transform:translateY(18px); pointer-events:none; transition:.24s ease;}
-.story.open{opacity:1; transform:translateY(0); pointer-events:auto;}
-.story-top{display:grid; grid-template-columns:64px 1fr; gap:10px; padding:11px; border-bottom:1px solid rgba(255,255,255,.08);}
-.story-top img{width:64px; height:64px; border-radius:12px; object-fit:cover; background:#123969;}
-.eyebrow{text-transform:uppercase; letter-spacing:.12em; font-size:9px; font-weight:900; color:#9fd6ff;}
-.story h2{margin:5px 0 4px; font-family:Georgia,serif; font-size:21px; line-height:.94; letter-spacing:-.05em;}
-.loc{font-size:11px; font-weight:850; color:#84c9ff;}
-.story-body{padding:11px; display:flex; flex-direction:column; gap:8px;}
-.summary{font-size:11.5px; line-height:1.45; color:#e5f1fb;}
-.tags{display:flex; flex-wrap:wrap; gap:6px;}
-.tag{font-size:9px; font-weight:850; padding:5px 8px; border-radius:8px; border:1px solid rgba(255,255,255,.12); background:rgba(255,255,255,.06);}
-.read{width:max-content; background:linear-gradient(180deg,rgba(99,183,255,.32),rgba(28,92,169,.9)); color:white; padding:8px 11px;}
-.close{position:absolute; right:8px; top:8px; width:28px; height:28px; border-radius:50%; border:1px solid rgba(255,255,255,.16); background:rgba(255,255,255,.06); color:#fff; font-size:16px; cursor:pointer;}
-.modal{position:absolute; inset:0; z-index:60; display:flex; align-items:center; justify-content:center; padding:20px; background:rgba(1,9,22,.56); backdrop-filter:blur(10px); opacity:0; pointer-events:none; transition:.25s ease;}
-.modal.open{opacity:1; pointer-events:auto;}
-.modal-card{position:relative; width:min(660px,86vw); border-radius:22px; padding:22px; border:1px solid var(--stroke); background:linear-gradient(180deg,rgba(9,42,91,.96),rgba(4,20,46,.96)); box-shadow:var(--shadow);}
-.modal h2{margin:8px 0; font-family:Georgia,serif; font-size:clamp(30px,4vw,48px); letter-spacing:-.05em; line-height:.94;}
-.modal p{margin:0; color:#e6f3ff; font-size:14px; line-height:1.7;}
+.quote, .tabs, .brand, .legend, .filters button, .story, .timeline-panel {
+  border: 1px solid var(--stroke);
+  background: linear-gradient(180deg, rgba(8,50,102,.62), rgba(3,18,40,.38));
+  backdrop-filter: blur(14px);
+  box-shadow: 0 10px 30px rgba(0,0,0,.16);
+}
 
-.timeline-panel{position:absolute; z-index:24; left:14px; right:14px; top:68px; bottom:56px; border:1px solid var(--stroke); border-radius:22px; background:linear-gradient(180deg,rgba(5,27,61,.82),rgba(2,17,39,.78)); backdrop-filter:blur(14px); box-shadow:var(--shadow); padding:16px; display:none; overflow:hidden;}
-.timeline-panel.open{display:block;}
-.timeline-head{display:flex; justify-content:space-between; align-items:flex-start; gap:14px; margin-bottom:12px;}
-.timeline-head h2{margin:0; font-family:Georgia,serif; font-size:clamp(26px,3vw,42px); line-height:.95; letter-spacing:-.05em;}
-.timeline-note{max-width:560px; color:var(--muted); font-size:11px; line-height:1.45; font-weight:700;}
-.timeline-grid{height:calc(100% - 76px); display:grid; grid-template-columns:repeat(6,minmax(120px,1fr)); gap:8px; overflow:hidden;}
-.time-card{min-height:0; border:1px solid rgba(255,255,255,.12); border-radius:14px; background:rgba(255,255,255,.055); padding:8px; display:grid; grid-template-rows:auto auto 1fr auto; gap:4px; cursor:pointer;}
-.time-year{color:#9fd6ff; font-size:10px; font-weight:950;}
-.time-name{font-family:Georgia,serif; font-size:14px; line-height:1.02; font-weight:800;}
-.time-text{color:#d9ebfb; font-size:9px; line-height:1.3; overflow:hidden;}
-.time-type{color:#b7d3ea; font-size:7.8px; font-weight:900; text-transform:uppercase; letter-spacing:.08em;}
+.quote {
+  border-radius: 14px;
+  padding: 7px 12px;
+  min-width: 0;
+  overflow: hidden;
+}
 
-.bottom{position:absolute; z-index:31; left:14px; right:14px; bottom:8px; display:flex; justify-content:space-between; align-items:flex-end; gap:10px;}
-.legend{display:flex; align-items:center; gap:8px; max-width:330px; padding:6px 8px; border-radius:12px; border:1px solid var(--stroke); background:linear-gradient(180deg,rgba(8,50,102,.62),rgba(3,18,40,.38)); backdrop-filter:blur(14px); color:var(--muted); font-size:8.5px; font-weight:850; box-shadow:0 10px 30px rgba(0,0,0,.16);}
-.dot{width:8px; height:8px; border-radius:50%; background:#69bdff; box-shadow:0 0 12px rgba(105,189,255,.9); flex:none;}
-.filters{display:flex; flex-wrap:wrap; gap:6px; justify-content:flex-end;}
-.filters button{padding:6px 8px; font-size:9.5px; background:linear-gradient(180deg,rgba(19,72,135,.76),rgba(7,35,78,.76));}
+.quote small {
+  display: block;
+  text-transform: uppercase;
+  letter-spacing: .14em;
+  color: #9ed5ff;
+  font-size: 7.8px;
+  font-weight: 900;
+  margin-bottom: 2px;
+}
 
-@media(max-width:980px){.timeline-grid{grid-template-columns:repeat(3,minmax(140px,1fr)); overflow:auto} .story{width:calc(100% - 28px); right:14px;} .brand{width:min(300px,28vw)} }
-@media(max-width:700px){
- .topbar{left:8px; right:8px; grid-template-columns:1fr;} .tabs{width:max-content}
- .brand{top:118px; left:8px; width:calc(100% - 16px); max-width:none;}
- .timeline-panel{left:8px; right:8px; top:144px; bottom:102px; padding:12px;}
- .timeline-head{display:block;} .timeline-grid{grid-template-columns:repeat(2,minmax(120px,1fr)); height:calc(100% - 110px); overflow:auto;}
- .bottom{left:8px; right:8px; bottom:8px; align-items:stretch; flex-direction:column;} .filters{justify-content:flex-start;} .marker,.marker button{width:28px;height:28px} .label{display:none} .story{left:8px; right:8px; width:auto; bottom:70px;}}
+.quote-text {
+  font-family: Georgia, serif;
+  font-size: clamp(11px,.78vw,14px);
+  line-height: 1.08;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  transition: opacity 1s ease, transform 1s ease;
+}
+
+.quote-author {
+  font-size: 8.5px;
+  color: #c6dff4;
+  font-weight: 800;
+  margin-top: 2px;
+  transition: opacity 1s ease, transform 1s ease;
+}
+
+.fade {
+  opacity: 0 !important;
+  transform: translateY(5px);
+}
+
+.tabs {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  padding: 6px;
+  border-radius: 14px;
+}
+
+.tab-btn, .filters button, .read {
+  border: 1px solid rgba(255,255,255,.14);
+  background: rgba(255,255,255,.06);
+  color: #e6f3ff;
+  border-radius: 999px;
+  padding: 7px 11px;
+  font-size: 10px;
+  font-weight: 900;
+  cursor: pointer;
+}
+
+.tab-btn.active, .filters button.active {
+  color: #fff;
+  background: linear-gradient(180deg, rgba(116,195,255,.42), rgba(29,99,173,.92));
+}
+
+.brand {
+  border-radius: 14px;
+  padding: 8px 12px;
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 14px;
+  align-items: center;
+  overflow: hidden;
+}
+
+.brand h1 {
+  margin: 0;
+  font-family: Georgia, serif;
+  font-size: clamp(21px, 1.7vw, 30px);
+  line-height: .92;
+  letter-spacing: -.05em;
+  white-space: nowrap;
+}
+
+.brand p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 10.5px;
+  line-height: 1.25;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.map-shell {
+  position: relative;
+  min-height: 0;
+  overflow: hidden;
+  border-radius: 22px;
+  border: 1px solid rgba(255,255,255,.12);
+  background: radial-gradient(circle at 50% 48%, rgba(108,184,255,.18), transparent 42%);
+}
+
+#map {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 2;
+}
+
+.map-loading {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  z-index: 1;
+  color: rgba(255,255,255,.34);
+  font-family: Georgia, serif;
+  font-size: 28px;
+  pointer-events: none;
+}
+
+.sea { fill: url(#seaGradient); }
+
+.land {
+  fill: url(#landGradient);
+  stroke: #d9e4d4;
+  stroke-width: .55;
+  vector-effect: non-scaling-stroke;
+  filter: url(#shadowSoft);
+}
+
+.land.active {
+  fill: url(#highlightGradient);
+  stroke: #f9f3d4;
+  stroke-width: .8;
+}
+
+.country-boundary {
+  fill: none;
+  stroke: rgba(255,255,255,.13);
+  stroke-width: .35;
+  vector-effect: non-scaling-stroke;
+}
+
+.graticule {
+  fill: none;
+  stroke: rgba(255,255,255,.08);
+  stroke-width: .5;
+}
+
+.atlas-label {
+  fill: rgba(240,246,255,.42);
+  font-family: Georgia, serif;
+  font-size: 14px;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+}
+
+.marker-layer {
+  position: absolute;
+  inset: 0;
+  z-index: 20;
+  pointer-events: none;
+}
+
+.marker {
+  position: absolute;
+  width: 25px;
+  height: 25px;
+  transform: translate(-50%, -50%);
+  pointer-events: auto;
+}
+
+.marker button {
+  width: 25px;
+  height: 25px;
+  border-radius: 50%;
+  padding: 0;
+  overflow: hidden;
+  cursor: pointer;
+  display: grid;
+  place-items: center;
+  border: 1.3px solid rgba(255,255,255,.88);
+  outline: 1.2px solid rgba(122,197,255,.36);
+  background: linear-gradient(145deg,rgba(133,208,255,.30),rgba(16,74,142,.90));
+  box-shadow: 0 5px 12px rgba(0,0,0,.26), 0 0 8px rgba(95,184,255,.32);
+}
+
+.marker button:hover {
+  transform: scale(1.18);
+}
+
+.marker img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.pulse {
+  position: absolute;
+  inset: -4px;
+  border-radius: 50%;
+  border: 1px solid rgba(125,202,255,.20);
+  animation: pulse 2.6s infinite;
+  pointer-events: none;
+}
+
+@keyframes pulse {
+  0% { transform: scale(.94); opacity: .65; }
+  72% { transform: scale(1.22); opacity: 0; }
+  100% { opacity: 0; }
+}
+
+.label {
+  position: absolute;
+  left: 50%;
+  top: 29px;
+  transform: translateX(-50%);
+  white-space: nowrap;
+  padding: 3px 6px;
+  border-radius: 999px;
+  background: rgba(3,20,46,.78);
+  border: 1px solid rgba(255,255,255,.10);
+  color: #f4fbff;
+  font-size: 8px;
+  font-weight: 900;
+  opacity: 0;
+  transition: opacity .2s;
+  pointer-events: none;
+}
+
+.marker:hover .label {
+  opacity: 1;
+}
+
+.bottom {
+  display: grid;
+  grid-template-columns: minmax(240px, 340px) 1fr;
+  gap: 10px;
+  align-items: center;
+  min-height: 0;
+}
+
+.legend {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border-radius: 12px;
+  padding: 6px 8px;
+  color: var(--muted);
+  font-size: 8.5px;
+  font-weight: 850;
+  overflow: hidden;
+}
+
+.dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #69bdff;
+  box-shadow: 0 0 12px rgba(105,189,255,.9);
+  flex: none;
+}
+
+.filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  justify-content: flex-end;
+  min-width: 0;
+}
+
+.filters button {
+  padding: 6px 8px;
+  font-size: 9.5px;
+}
+
+.story {
+  position: absolute;
+  z-index: 35;
+  right: 12px;
+  bottom: 12px;
+  width: min(300px, 24vw);
+  border-radius: 18px;
+  overflow: hidden;
+  opacity: 0;
+  transform: translateY(18px);
+  pointer-events: none;
+  transition: .24s ease;
+}
+
+.story.open {
+  opacity: 1;
+  transform: translateY(0);
+  pointer-events: auto;
+}
+
+.story-top {
+  display: grid;
+  grid-template-columns: 58px 1fr;
+  gap: 9px;
+  padding: 10px;
+  border-bottom: 1px solid rgba(255,255,255,.08);
+}
+
+.story-top img {
+  width: 58px;
+  height: 58px;
+  border-radius: 11px;
+  object-fit: cover;
+  background: #123969;
+}
+
+.eyebrow {
+  text-transform: uppercase;
+  letter-spacing: .12em;
+  font-size: 8.5px;
+  font-weight: 900;
+  color: #9fd6ff;
+}
+
+.story h2 {
+  margin: 4px 0 3px;
+  font-family: Georgia, serif;
+  font-size: 19px;
+  line-height: .94;
+  letter-spacing: -.05em;
+}
+
+.loc {
+  font-size: 10.5px;
+  font-weight: 850;
+  color: #84c9ff;
+}
+
+.story-body {
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+
+.summary {
+  font-size: 10.8px;
+  line-height: 1.42;
+  color: #e5f1fb;
+}
+
+.tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+}
+
+.tag {
+  font-size: 8.5px;
+  font-weight: 850;
+  padding: 4px 7px;
+  border-radius: 7px;
+  border: 1px solid rgba(255,255,255,.12);
+  background: rgba(255,255,255,.06);
+}
+
+.read {
+  width: max-content;
+  background: linear-gradient(180deg,rgba(99,183,255,.32),rgba(28,92,169,.9));
+  color: white;
+  padding: 7px 10px;
+}
+
+.close {
+  position: absolute;
+  right: 7px;
+  top: 7px;
+  width: 25px;
+  height: 25px;
+  border-radius: 50%;
+  border: 1px solid rgba(255,255,255,.16);
+  background: rgba(255,255,255,.06);
+  color: #fff;
+  font-size: 15px;
+  cursor: pointer;
+}
+
+.modal {
+  position: absolute;
+  inset: 0;
+  z-index: 60;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  background: rgba(1,9,22,.56);
+  backdrop-filter: blur(10px);
+  opacity: 0;
+  pointer-events: none;
+  transition: .25s ease;
+}
+
+.modal.open {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.modal-card {
+  position: relative;
+  width: min(640px,86vw);
+  border-radius: 22px;
+  padding: 22px;
+  border: 1px solid var(--stroke);
+  background: linear-gradient(180deg,rgba(9,42,91,.96),rgba(4,20,46,.96));
+  box-shadow: var(--shadow);
+}
+
+.modal h2 {
+  margin: 8px 0;
+  font-family: Georgia, serif;
+  font-size: clamp(30px,4vw,48px);
+  letter-spacing: -.05em;
+  line-height: .94;
+}
+
+.modal p {
+  margin: 0;
+  color: #e6f3ff;
+  font-size: 14px;
+  line-height: 1.7;
+}
+
+.timeline-panel {
+  position: absolute;
+  inset: 0;
+  z-index: 24;
+  border: 1px solid var(--stroke);
+  border-radius: 22px;
+  background: linear-gradient(180deg,rgba(5,27,61,.82),rgba(2,17,39,.78));
+  backdrop-filter: blur(14px);
+  box-shadow: var(--shadow);
+  padding: 16px;
+  display: none;
+  overflow: hidden;
+}
+
+.timeline-panel.open {
+  display: block;
+}
+
+.timeline-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 14px;
+  margin-bottom: 12px;
+}
+
+.timeline-head h2 {
+  margin: 0;
+  font-family: Georgia, serif;
+  font-size: clamp(26px,3vw,42px);
+  line-height: .95;
+  letter-spacing: -.05em;
+}
+
+.timeline-note {
+  max-width: 560px;
+  color: var(--muted);
+  font-size: 11px;
+  line-height: 1.45;
+  font-weight: 700;
+}
+
+.timeline-grid {
+  height: calc(100% - 76px);
+  display: grid;
+  grid-template-columns: repeat(6,minmax(120px,1fr));
+  gap: 8px;
+  overflow: hidden;
+}
+
+.time-card {
+  min-height: 0;
+  border: 1px solid rgba(255,255,255,.12);
+  border-radius: 14px;
+  background: rgba(255,255,255,.055);
+  padding: 8px;
+  display: grid;
+  grid-template-rows: auto auto 1fr auto;
+  gap: 4px;
+  cursor: pointer;
+}
+
+.time-year {
+  color: #9fd6ff;
+  font-size: 10px;
+  font-weight: 950;
+}
+
+.time-name {
+  font-family: Georgia, serif;
+  font-size: 14px;
+  line-height: 1.02;
+  font-weight: 800;
+}
+
+.time-text {
+  color: #d9ebfb;
+  font-size: 9px;
+  line-height: 1.3;
+  overflow: hidden;
+}
+
+.time-type {
+  color: #b7d3ea;
+  font-size: 7.8px;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: .08em;
+}
+
+@media(max-width:980px) {
+  .frame { grid-template-rows: 96px 58px 1fr 72px; }
+  .topbar { grid-template-columns: 1fr; }
+  .tabs { width: max-content; }
+  .bottom { grid-template-columns: 1fr; }
+  .filters { justify-content: flex-start; }
+  .timeline-grid { grid-template-columns: repeat(3,minmax(140px,1fr)); overflow: auto; }
+  .story { width: calc(100% - 24px); right: 12px; }
+}
+
+@media(max-width:700px) {
+  .app { padding: 8px; }
+  .frame { border-radius: 20px; padding: 8px; grid-template-rows: 96px 76px 1fr 108px; }
+  .brand { grid-template-columns: 1fr; gap: 4px; }
+  .brand h1 { white-space: normal; }
+  .brand p { white-space: normal; }
+  .marker, .marker button { width: 22px; height: 22px; }
+  .label { display: none; }
+  .timeline-grid { grid-template-columns: repeat(2,minmax(120px,1fr)); }
+  .story { left: 8px; right: 8px; width: auto; }
+}
 </style>
 </head>
+
 <body>
-<div class="app"><main class="frame">
-  <section class="topbar">
-    <section class="quote"><small>Voices on women’s rights</small><div id="quoteText" class="quote-text">“Women belong in all places where decisions are being made.”</div><div id="quoteAuthor" class="quote-author">— Ruth Bader Ginsburg</div></section>
-    <nav class="tabs" aria-label="View tabs"><button class="tab-btn active" id="mapTab">Map</button><button class="tab-btn" id="timelineTab">Timeline</button></nav>
-  </section>
-  <section class="brand" id="brand"><h1>Women of Legend</h1><p>Folklore, resistance and women’s agency across continents. Click a portrait to open the story layer.</p></section>
-  <div class="map-loading">Loading atlas map…</div>
-  <svg id="map" aria-label="World map"></svg>
-  <div id="markerLayer" class="marker-layer"></div>
-  <section class="timeline-panel" id="timelinePanel"><div class="timeline-head"><h2>Timeline</h2><div class="timeline-note">Dates are shown as exact years where defensible and as approximate periods where the figure is legendary, ancient, or preserved mainly through oral tradition.</div></div><div class="timeline-grid" id="timelineGrid"></div></section>
-  <article id="story" class="story"><button id="closeStory" class="close">×</button><div class="story-top"><img id="storyImg" alt=""><div><div id="storyEra" class="eyebrow"></div><h2 id="storyName"></h2><div id="storyLoc" class="loc"></div></div></div><div class="story-body"><div id="storySummary" class="summary"></div><div id="storyTags" class="tags"></div><button id="readFull" class="read">Read full story</button></div></article>
-  <section id="modal" class="modal"><div class="modal-card"><button id="closeModal" class="close">×</button><div id="modalEra" class="eyebrow"></div><h2 id="modalName"></h2><div id="modalLoc" class="loc" style="margin-bottom:14px"></div><p id="modalBody"></p></div></section>
-  <section class="bottom" id="bottomControls"><div class="legend"><span class="dot"></span><span>v7 atlas · Larger map, smaller icons, slimmer quotes, and a more atlas-style sea/land treatment.</span></div><div id="filters" class="filters"></div></section>
-</main></div>
+<div class="app">
+  <main class="frame">
+    <section class="topbar">
+      <section class="quote">
+        <small>Voices on women’s rights</small>
+        <div id="quoteText" class="quote-text">“Women belong in all places where decisions are being made.”</div>
+        <div id="quoteAuthor" class="quote-author">— Ruth Bader Ginsburg</div>
+      </section>
+      <nav class="tabs" aria-label="View tabs">
+        <button class="tab-btn active" id="mapTab">Map</button>
+        <button class="tab-btn" id="timelineTab">Timeline</button>
+      </nav>
+    </section>
+
+    <section class="brand" id="brand">
+      <h1>Women of Legend</h1>
+      <p>Folklore, resistance and women’s agency across continents. Click a portrait to open the story layer.</p>
+    </section>
+
+    <section class="map-shell">
+      <div class="map-loading">Loading atlas map…</div>
+      <svg id="map" aria-label="World map"></svg>
+      <div id="markerLayer" class="marker-layer"></div>
+
+      <section class="timeline-panel" id="timelinePanel">
+        <div class="timeline-head">
+          <h2>Timeline</h2>
+          <div class="timeline-note">Dates are exact where defensible and approximate where the figure is legendary, ancient, or preserved mainly through oral tradition.</div>
+        </div>
+        <div class="timeline-grid" id="timelineGrid"></div>
+      </section>
+
+      <article id="story" class="story">
+        <button id="closeStory" class="close">×</button>
+        <div class="story-top">
+          <img id="storyImg" alt="">
+          <div>
+            <div id="storyEra" class="eyebrow"></div>
+            <h2 id="storyName"></h2>
+            <div id="storyLoc" class="loc"></div>
+          </div>
+        </div>
+        <div class="story-body">
+          <div id="storySummary" class="summary"></div>
+          <div id="storyTags" class="tags"></div>
+          <button id="readFull" class="read">Read full story</button>
+        </div>
+      </article>
+    </section>
+
+    <section id="modal" class="modal">
+      <div class="modal-card">
+        <button id="closeModal" class="close">×</button>
+        <div id="modalEra" class="eyebrow"></div>
+        <h2 id="modalName"></h2>
+        <div id="modalLoc" class="loc" style="margin-bottom:14px"></div>
+        <p id="modalBody"></p>
+      </div>
+    </section>
+
+    <section class="bottom" id="bottomControls">
+      <div class="legend"><span class="dot"></span><span>v8 no-overlap atlas · quote, title, map, and filters each have their own row.</span></div>
+      <div id="filters" class="filters"></div>
+    </section>
+  </main>
+</div>
+
 <script>
 const stories = [{"id": "yaa", "name": "Yaa Asantewaa", "country": "Ghana", "continent": "Africa", "coords": [-1.02, 7.95], "iso": "288", "wiki": "Yaa_Asantewaa", "year": "1900", "sort": 1900, "type": "historical / archival", "era": "Asante queen mother", "tags": ["Resistance", "Leadership"], "summary": "Led Asante resistance during the War of the Golden Stool.", "image": "assets/faces/yaa.svg"}, {"id": "amina", "name": "Queen Amina", "country": "Nigeria", "continent": "Africa", "coords": [7.72, 11.08], "iso": "566", "wiki": "Amina", "year": "c. 16th century", "sort": 1550, "type": "legendary / artwork", "era": "Hausa warrior queen", "tags": ["Rule", "Strategy"], "summary": "Remembered as a formidable ruler of Zazzau and symbol of female sovereignty.", "image": "assets/faces/amina.svg"}, {"id": "mekatilili", "name": "Mekatilili wa Menza", "country": "Kenya", "continent": "Africa", "coords": [39.85, -3.63], "iso": "404", "wiki": "Mekatilili_wa_Menza", "year": "1913–1914", "sort": 1913, "type": "historical / archival", "era": "Giriama resistance", "tags": ["Anti-colonial", "Oral tradition"], "summary": "Mobilised Giriama resistance against colonial labour and cultural control.", "image": "assets/faces/mekatilili.svg"}, {"id": "agojie", "name": "Agojie", "country": "Benin", "continent": "Africa", "coords": [2.31, 9.31], "iso": "204", "wiki": "Dahomey_Amazons", "year": "17th–19th c.", "sort": 1700, "type": "historical group image", "era": "Dahomey women warriors", "tags": ["Warriors", "Power"], "summary": "All-female regiment remembered for discipline, training and battlefield power.", "image": "assets/faces/agojie.svg"}, {"id": "arawelo", "name": "Queen Arawelo", "country": "Somalia", "continent": "Africa", "coords": [46.19, 5.15], "iso": "706", "wiki": "Arawelo", "year": "Legendary", "sort": 1200, "type": "folkloric illustration", "era": "Somali legendary queen", "tags": ["Myth", "Authority"], "summary": "A contested legendary queen interpreted as female authority and patriarchal anxiety.", "image": "assets/faces/arawelo.svg"}, {"id": "mulan", "name": "Hua Mulan", "country": "China", "continent": "Asia", "coords": [104.19, 35.86], "iso": "156", "wiki": "Hua_Mulan", "year": "c. 4th–6th c.", "sort": 500, "type": "folkloric artwork", "era": "Ballad of Mulan", "tags": ["Legend", "Duty"], "summary": "Takes her father’s place in war, challenging assumptions about gender and duty.", "image": "assets/faces/mulan.svg"}, {"id": "trung", "name": "Trưng Sisters", "country": "Vietnam", "continent": "Asia", "coords": [105.83, 21.03], "iso": "704", "wiki": "Trưng_sisters", "year": "40–43 CE", "sort": 40, "type": "historical artwork/statue", "era": "Rebellion leaders", "tags": ["Rebellion", "Sovereignty"], "summary": "Led rebellion against Han domination and became symbols of Vietnamese independence.", "image": "assets/faces/trung.svg"}, {"id": "lakshmibai", "name": "Rani Lakshmibai", "country": "India", "continent": "Asia", "coords": [78.57, 25.45], "iso": "356", "wiki": "Rani_of_Jhansi", "year": "1857–1858", "sort": 1857, "type": "historical painting", "era": "Queen of Jhansi", "tags": ["Rebellion", "Sovereignty"], "summary": "Fought colonial annexation during the 1857 uprising.", "image": "assets/faces/lakshmibai.svg"}, {"id": "tomoe", "name": "Tomoe Gozen", "country": "Japan", "continent": "Asia", "coords": [138.25, 36.2], "iso": "392", "wiki": "Tomoe_Gozen", "year": "late 12th c.", "sort": 1180, "type": "historical artwork", "era": "Warrior of the Heike", "tags": ["Warrior", "Honour"], "summary": "Remembered as a woman warrior associated with martial honour and battlefield skill.", "image": "assets/faces/tomoe.svg"}, {"id": "gabriela", "name": "Gabriela Silang", "country": "Philippines", "continent": "Asia", "coords": [120.98, 14.6], "iso": "608", "wiki": "Gabriela_Silang", "year": "1763", "sort": 1763, "type": "historical artwork", "era": "Revolutionary leader", "tags": ["Revolt", "Anti-colonial"], "summary": "Took command of revolt and became a symbol of revolutionary female leadership.", "image": "assets/faces/gabriela.svg"}, {"id": "boudicca", "name": "Boudicca", "country": "Britain", "continent": "Europe", "coords": [0.12, 52.2], "iso": "826", "wiki": "Boudica", "year": "60–61 CE", "sort": 60, "type": "historical artwork/statue", "era": "Iceni queen", "tags": ["Revolt", "Justice"], "summary": "Led revolt against Roman rule after violence against her family and people.", "image": "assets/faces/boudicca.svg"}, {"id": "joan", "name": "Joan of Arc", "country": "France", "continent": "Europe", "coords": [2.21, 46.23], "iso": "250", "wiki": "Joan_of_Arc", "year": "1429–1431", "sort": 1429, "type": "historical artwork", "era": "Saint and soldier", "tags": ["Faith", "War"], "summary": "Became a symbol of courage, divine conviction and national liberation.", "image": "assets/faces/joan.svg"}, {"id": "grace", "name": "Grace O’Malley", "country": "Ireland", "continent": "Europe", "coords": [-9.06, 53.8], "iso": "372", "wiki": "Grace_O'Malley", "year": "c. 1530–1603", "sort": 1560, "type": "historical artwork", "era": "Pirate queen", "tags": ["Sea power", "Autonomy"], "summary": "Sea captain and clan leader remembered for defending autonomy.", "image": "assets/faces/grace.svg"}, {"id": "maria", "name": "María Pita", "country": "Spain", "continent": "Europe", "coords": [-8.41, 43.36], "iso": "724", "wiki": "María_Pita", "year": "1589", "sort": 1589, "type": "historical artwork/statue", "era": "Defender of A Coruña", "tags": ["Defence", "Civic courage"], "summary": "Remembered for defending A Coruña and becoming a symbol of civic courage.", "image": "assets/faces/maria.svg"}, {"id": "brites", "name": "Brites de Almeida", "country": "Portugal", "continent": "Europe", "coords": [-8.22, 39.66], "iso": "620", "wiki": "Brites_de_Almeida", "year": "1385 legend", "sort": 1385, "type": "folkloric artwork", "era": "Baker of Aljubarrota", "tags": ["Folklore", "Resistance"], "summary": "Legendary baker said to have fought invading soldiers.", "image": "assets/faces/brites.svg"}, {"id": "adelita", "name": "La Adelita", "country": "Mexico", "continent": "North America", "coords": [-102.55, 23.63], "iso": "484", "wiki": "Soldaderas", "year": "1910–1920", "sort": 1910, "type": "historical group image", "era": "Soldadera symbol", "tags": ["Revolution", "Song"], "summary": "Symbolises women’s participation in the Mexican Revolution.", "image": "assets/faces/adelita.svg"}, {"id": "nanny", "name": "Nanny of the Maroons", "country": "Jamaica", "continent": "North America", "coords": [-77.3, 18.1], "iso": "388", "wiki": "Nanny_of_the_Maroons", "year": "c. 1720s–1730s", "sort": 1730, "type": "historical artwork/statue", "era": "Maroon leader", "tags": ["Freedom", "Anti-slavery"], "summary": "Remembered for guerrilla leadership and anti-slavery resistance.", "image": "assets/faces/nanny.svg"}, {"id": "tubman", "name": "Harriet Tubman", "country": "United States", "continent": "North America", "coords": [-76.08, 38.88], "iso": "840", "wiki": "Harriet_Tubman", "year": "1849–1860s", "sort": 1849, "type": "historical photograph", "era": "Moses of her people", "tags": ["Freedom", "Abolition"], "summary": "Escaped slavery, rescued others, supported abolition and women’s suffrage.", "image": "assets/faces/tubman.svg"}, {"id": "thanadelthur", "name": "Thanadelthur", "country": "Canada", "continent": "North America", "coords": [-96.82, 58.77], "iso": "124", "wiki": "Thanadelthur", "year": "1715–1717", "sort": 1715, "type": "illustrated / no verified photo", "era": "Dene diplomat", "tags": ["Diplomacy", "Peace"], "summary": "Escaped captivity and became a diplomat and peace-maker.", "image": "assets/faces/thanadelthur.svg"}, {"id": "anacaona", "name": "Anacaona", "country": "Haiti", "continent": "North America", "coords": [-72.29, 18.97], "iso": "332", "wiki": "Anacaona", "year": "c. 1503", "sort": 1503, "type": "historical artwork", "era": "Taíno cacica", "tags": ["Indigenous rule", "Memory"], "summary": "Taíno ruler and cultural figure remembered under colonial violence.", "image": "assets/faces/anacaona.svg"}, {"id": "dandara", "name": "Dandara dos Palmares", "country": "Brazil", "continent": "South America", "coords": [-36.53, -9.17], "iso": "076", "wiki": "Dandara", "year": "17th century", "sort": 1670, "type": "illustrated / debated detail", "era": "Palmares warrior", "tags": ["Anti-slavery", "Resistance"], "summary": "Associated with Palmares and Afro-Brazilian resistance to enslavement.", "image": "assets/faces/dandara.svg"}, {"id": "bartolina", "name": "Bartolina Sisa", "country": "Bolivia", "continent": "South America", "coords": [-68.15, -16.5], "iso": "068", "wiki": "Bartolina_Sisa", "year": "1781", "sort": 1781, "type": "historical artwork", "era": "Aymara rebel leader", "tags": ["Indigenous resistance", "Rebellion"], "summary": "Fought Spanish colonial power and became a symbol of Indigenous women’s resistance.", "image": "assets/faces/bartolina.svg"}, {"id": "micaela", "name": "Micaela Bastidas", "country": "Peru", "continent": "South America", "coords": [-72.88, -13.52], "iso": "604", "wiki": "Micaela_Bastidas", "year": "1780–1781", "sort": 1780, "type": "historical artwork", "era": "Andean organiser", "tags": ["Organisation", "Anti-colonial"], "summary": "Co-led rebellion and is remembered for strategy, logistics and resolve.", "image": "assets/faces/micaela.svg"}, {"id": "juana", "name": "Juana Azurduy", "country": "Argentina", "continent": "South America", "coords": [-65.2, -22.73], "iso": "032", "wiki": "Juana_Azurduy_de_Padilla", "year": "1810s", "sort": 1810, "type": "historical artwork", "era": "Independence fighter", "tags": ["Independence", "Guerrilla"], "summary": "Celebrated guerrilla leader in the South American wars of independence.", "image": "assets/faces/juana.svg"}, {"id": "gaitana", "name": "La Gaitana", "country": "Colombia", "continent": "South America", "coords": [-75.28, 2.93], "iso": "170", "wiki": "La_Gaitana", "year": "1539", "sort": 1539, "type": "historical artwork/statue", "era": "Indigenous resistance figure", "tags": ["Indigenous resistance", "Justice"], "summary": "Remembered as an Indigenous woman who organised resistance against colonisation.", "image": "assets/faces/gaitana.svg"}, {"id": "nafanua", "name": "Nafanua", "country": "Samoa", "continent": "Oceania", "coords": [-172.1, -13.76], "iso": "882", "wiki": "Nafanua", "year": "Mythic", "sort": 1000, "type": "folkloric illustration", "era": "Samoan war goddess", "tags": ["Myth", "Authority"], "summary": "Associated with female authority, sacred power and political legitimacy.", "image": "assets/faces/nafanua.svg"}, {"id": "hinemoa", "name": "Hinemoa", "country": "Aotearoa / New Zealand", "continent": "Oceania", "coords": [176.25, -38.14], "iso": "554", "wiki": "Hinemoa", "year": "Traditional", "sort": 1600, "type": "folkloric artwork", "era": "Māori love legend", "tags": ["Choice", "Autonomy"], "summary": "Chooses love across social barriers; useful for themes of female choice and autonomy.", "image": "assets/faces/hinemoa.svg"}, {"id": "tarenorerer", "name": "Tarenorerer", "country": "Australia", "continent": "Oceania", "coords": [147.33, -42.88], "iso": "036", "wiki": "Tarenorerer", "year": "1820s–1830s", "sort": 1830, "type": "illustrated / no verified photo", "era": "Tasmanian Aboriginal resistance", "tags": ["Resistance", "Colonisation"], "summary": "Remembered for leading armed Aboriginal resistance in Tasmania.", "image": "assets/faces/tarenorerer.svg"}, {"id": "naghol", "name": "Naghol Origin Woman", "country": "Vanuatu", "continent": "Oceania", "coords": [168.32, -16.28], "iso": "548", "wiki": "Land_diving", "year": "Traditional", "sort": 1500, "type": "cultural context / no individual face", "era": "Land-diving origin legend", "tags": ["Escape", "Autonomy"], "summary": "Origin legend centres on a woman escaping an abusive husband by tying vines to her ankles.", "image": "assets/faces/naghol.svg"}, {"id": "hikuleo", "name": "Hikuleʻo", "country": "Tonga", "continent": "Oceania", "coords": [-175.2, -21.18], "iso": "776", "wiki": "Hikuleo", "year": "Mythic", "sort": 1000, "type": "folkloric illustration", "era": "Tongan sacred power", "tags": ["Myth", "Power"], "summary": "Traditions offer a symbolic frame for female sacred power and authority.", "image": "assets/faces/hikuleo.svg"}];
-const quotes=[{text:'There is no limit to what we, as women, can accomplish.',author:'Michelle Obama'},{text:'I raise up my voice — not so I can shout, but so that those without a voice can be heard.',author:'Malala Yousafzai'},{text:'Women belong in all places where decisions are being made.',author:'Ruth Bader Ginsburg'},{text:'I would rather be a rebel than a slave.',author:'Emmeline Pankhurst'},{text:'Ain’t I a woman?',author:'Sojourner Truth'},{text:'Freedom cannot be achieved unless women have been emancipated from all forms of oppression.',author:'Nelson Mandela'}];
-const continents=['All','Africa','Asia','Europe','North America','South America','Oceania'];
-let selected='All', activeStory=null;
-const svg=d3.select('#map'), markerLayer=document.getElementById('markerLayer'), filters=document.getElementById('filters'), story=document.getElementById('story'), timelinePanel=document.getElementById('timelinePanel'), timelineGrid=document.getElementById('timelineGrid'), brand=document.getElementById('brand'), quoteText=document.getElementById('quoteText'), quoteAuthor=document.getElementById('quoteAuthor');
-function visible(){return selected==='All'?stories:stories.filter(d=>d.continent===selected)}
-function norm(id){return String(id).padStart(3,'0')}
-function fallback(s){return `assets/faces/${s.id}.svg`;}
-async function loadWiki(s){ if(!s.wiki) return s.image; try{ const url=`https://en.wikipedia.org/w/api.php?action=query&origin=*&format=json&prop=pageimages&piprop=thumbnail&pithumbsize=240&titles=${encodeURIComponent(s.wiki)}`; const r=await fetch(url); const d=await r.json(); const p=Object.values(d.query.pages)[0]; return p?.thumbnail?.source||s.image; }catch(e){ return s.image; } }
-async function hydrate(){ await Promise.all(stories.map(async s=>{ s.displayImage=await loadWiki(s); })); }
-function makeFilters(){ filters.innerHTML=''; continents.forEach(c=>{ const b=document.createElement('button'); b.textContent=c; b.className=c===selected?'active':''; b.onclick=()=>{ selected=c; makeFilters(); render(); renderTimeline(); if(activeStory&&selected!=='All'&&activeStory.continent!==selected) story.classList.remove('open'); }; filters.appendChild(b); }); }
-function openStory(s){ activeStory=s; const img=document.getElementById('storyImg'); img.onerror=()=>{img.onerror=null; img.src=fallback(s);}; img.src=s.displayImage||s.image; document.getElementById('storyEra').textContent=s.era||''; document.getElementById('storyName').textContent=s.name; document.getElementById('storyLoc').textContent=`📍 ${s.country} · ${s.continent} · ${s.year||''}`; document.getElementById('storySummary').textContent=s.summary||''; document.getElementById('storyTags').innerHTML=[...(s.tags||[]), s.type||''].filter(Boolean).map(t=>`<span class="tag">${t}</span>`).join(''); story.classList.add('open'); }
-document.getElementById('closeStory').onclick=()=>story.classList.remove('open');
-document.getElementById('readFull').onclick=()=>{ if(!activeStory) return; document.getElementById('modalEra').textContent=activeStory.era||''; document.getElementById('modalName').textContent=activeStory.name; document.getElementById('modalLoc').textContent=`📍 ${activeStory.country} · ${activeStory.continent} · ${activeStory.year||''}`; document.getElementById('modalBody').textContent=(activeStory.summary||'')+' Image note: '+(activeStory.type||'')+'.'; document.getElementById('modal').classList.add('open'); };
-document.getElementById('closeModal').onclick=()=>document.getElementById('modal').classList.remove('open'); document.getElementById('modal').onclick=e=>{ if(e.target.id==='modal') e.target.classList.remove('open'); };
-function rotateQuotes(){ let i=0; setInterval(()=>{ i=(i+1)%quotes.length; quoteText.classList.add('fade'); quoteAuthor.classList.add('fade'); setTimeout(()=>{ quoteText.textContent='“'+quotes[i].text+'”'; quoteAuthor.textContent='— '+quotes[i].author; quoteText.classList.remove('fade'); quoteAuthor.classList.remove('fade'); },400); },7000); }
-async function render(){ try{ const frame=document.querySelector('.frame'), w=frame.clientWidth, h=frame.clientHeight; svg.selectAll('*').remove(); markerLayer.innerHTML=''; svg.attr('viewBox',`0 0 ${w} ${h}`); const defs=svg.append('defs'); const seaGrad=defs.append('radialGradient').attr('id','seaGradient').attr('cx','50%').attr('cy','46%').attr('r','65%'); seaGrad.append('stop').attr('offset','0%').attr('stop-color','#4e96cb'); seaGrad.append('stop').attr('offset','45%').attr('stop-color','#2c6ea8'); seaGrad.append('stop').attr('offset','100%').attr('stop-color','#143c67'); const landGrad=defs.append('linearGradient').attr('id','landGradient').attr('x1','0').attr('y1','0').attr('x2','0').attr('y2','1'); landGrad.append('stop').attr('offset','0%').attr('stop-color','#e8ead8'); landGrad.append('stop').attr('offset','48%').attr('stop-color','#ccd3bb'); landGrad.append('stop').attr('offset','100%').attr('stop-color','#afbb9a'); const highGrad=defs.append('linearGradient').attr('id','highlightGradient').attr('x1','0').attr('y1','0').attr('x2','0').attr('y2','1'); highGrad.append('stop').attr('offset','0%').attr('stop-color','#f1e4a8'); highGrad.append('stop').attr('offset','100%').attr('stop-color','#ceb56f'); const filter=defs.append('filter').attr('id','shadowSoft').attr('x','-20%').attr('y','-20%').attr('width','140%').attr('height','140%'); filter.append('feDropShadow').attr('dx','0').attr('dy','1').attr('stdDeviation','1.4').attr('flood-color','#0b1c30').attr('flood-opacity','.22'); const projection=d3.geoNaturalEarth1().fitExtent([[8,34],[w-8,h-34]],{type:'Sphere'}), path=d3.geoPath(projection), world=await d3.json('https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json'); const countries=topojson.feature(world,world.objects.countries).features; const mesh=topojson.mesh(world, world.objects.countries, (a,b)=>a!==b); const vis=visible(), ids=new Set(vis.map(d=>d.iso)); svg.append('path').datum({type:'Sphere'}).attr('class','sea').attr('d',path); svg.append('path').datum(d3.geoGraticule10()).attr('class','graticule').attr('d',path); svg.append('g').selectAll('path').data(countries).join('path').attr('class',d=>ids.has(norm(d.id))?'land active':'land').attr('d',path); svg.append('path').datum(mesh).attr('class','country-boundary').attr('d',path); const labelGroup=svg.append('g'); [['Pacific Ocean',0.18,0.56],['Atlantic Ocean',0.49,0.47],['Indian Ocean',0.67,0.59]].forEach(([t,rx,ry])=>{ labelGroup.append('text').attr('class','atlas-label').attr('x',w*rx).attr('y',h*ry).text(t); });
- vis.forEach(s=>{ const [x,y]=projection(s.coords); const m=document.createElement('div'); m.className='marker'; m.style.left=x+'px'; m.style.top=y+'px'; m.innerHTML=`<div class="pulse"></div><button aria-label="${s.name}"><img src="${s.displayImage||s.image}" alt="${s.name}"></button><div class="label">${s.name}</div>`; const im=m.querySelector('img'); im.addEventListener('error',()=>{ im.src=fallback(s); },{once:true}); m.querySelector('button').onclick=()=>openStory(s); markerLayer.appendChild(m); }); document.querySelector('.map-loading').style.display='none'; }catch(e){ console.error(e); document.querySelector('.map-loading').textContent='Map failed to load'; } }
-function renderTimeline(){ const arr=[...visible()].sort((a,b)=>(a.sort||0)-(b.sort||0)); timelineGrid.innerHTML=arr.map(s=>`<article class="time-card" data-id="${s.id}"><div class="time-year">${s.year||''}</div><div class="time-name">${s.name}</div><div class="time-text">${s.country} · ${s.summary||''}</div><div class="time-type">${s.type||''} · ${s.continent}</div></article>`).join(''); timelineGrid.querySelectorAll('.time-card').forEach(c=>c.onclick=()=>{ const f=stories.find(s=>s.id===c.dataset.id); if(f) openStory(f); }); }
-function setView(v){ const tl=v==='timeline'; document.getElementById('mapTab').classList.toggle('active',!tl); document.getElementById('timelineTab').classList.toggle('active',tl); timelinePanel.classList.toggle('open',tl); svg.style('opacity', tl ? .14 : 1); markerLayer.style.display=tl?'none':'block'; brand.style.display=tl?'none':'block'; story.classList.remove('open'); renderTimeline(); }
-document.getElementById('mapTab').onclick=()=>setView('map'); document.getElementById('timelineTab').onclick=()=>setView('timeline');
-makeFilters(); renderTimeline(); rotateQuotes(); render(); hydrate().then(()=>{ render(); renderTimeline(); }); let timer; window.addEventListener('resize',()=>{ clearTimeout(timer); timer=setTimeout(render,120); });
+
+const quotes = [
+  {text:'There is no limit to what we, as women, can accomplish.',author:'Michelle Obama'},
+  {text:'I raise up my voice — not so I can shout, but so that those without a voice can be heard.',author:'Malala Yousafzai'},
+  {text:'Women belong in all places where decisions are being made.',author:'Ruth Bader Ginsburg'},
+  {text:'I would rather be a rebel than a slave.',author:'Emmeline Pankhurst'},
+  {text:'Ain’t I a woman?',author:'Sojourner Truth'},
+  {text:'Freedom cannot be achieved unless women have been emancipated from all forms of oppression.',author:'Nelson Mandela'}
+];
+
+const continents = ['All','Africa','Asia','Europe','North America','South America','Oceania'];
+let selected = 'All';
+let activeStory = null;
+
+const svg = d3.select('#map');
+const markerLayer = document.getElementById('markerLayer');
+const filters = document.getElementById('filters');
+const story = document.getElementById('story');
+const timelinePanel = document.getElementById('timelinePanel');
+const timelineGrid = document.getElementById('timelineGrid');
+const brand = document.getElementById('brand');
+const quoteText = document.getElementById('quoteText');
+const quoteAuthor = document.getElementById('quoteAuthor');
+
+function visible() {
+  return selected === 'All' ? stories : stories.filter(d => d.continent === selected);
+}
+
+function norm(id) {
+  return String(id).padStart(3, '0');
+}
+
+function fallback(s) {
+  return `assets/faces/${s.id}.svg`;
+}
+
+async function loadWiki(s) {
+  if (!s.wiki) return s.image;
+  try {
+    const url = `https://en.wikipedia.org/w/api.php?action=query&origin=*&format=json&prop=pageimages&piprop=thumbnail&pithumbsize=240&titles=${encodeURIComponent(s.wiki)}`;
+    const r = await fetch(url);
+    const d = await r.json();
+    const p = Object.values(d.query.pages)[0];
+    return p?.thumbnail?.source || s.image;
+  } catch(e) {
+    return s.image;
+  }
+}
+
+async function hydrate() {
+  await Promise.all(stories.map(async s => {
+    s.displayImage = await loadWiki(s);
+  }));
+}
+
+function makeFilters() {
+  filters.innerHTML = '';
+  continents.forEach(c => {
+    const b = document.createElement('button');
+    b.textContent = c;
+    b.className = c === selected ? 'active' : '';
+    b.onclick = () => {
+      selected = c;
+      makeFilters();
+      render();
+      renderTimeline();
+      if (activeStory && selected !== 'All' && activeStory.continent !== selected) {
+        story.classList.remove('open');
+      }
+    };
+    filters.appendChild(b);
+  });
+}
+
+function openStory(s) {
+  activeStory = s;
+  const img = document.getElementById('storyImg');
+  img.onerror = () => {
+    img.onerror = null;
+    img.src = fallback(s);
+  };
+  img.src = s.displayImage || s.image;
+
+  document.getElementById('storyEra').textContent = s.era || '';
+  document.getElementById('storyName').textContent = s.name;
+  document.getElementById('storyLoc').textContent = `📍 ${s.country} · ${s.continent} · ${s.year || ''}`;
+  document.getElementById('storySummary').textContent = s.summary || '';
+  document.getElementById('storyTags').innerHTML = [...(s.tags || []), s.type || ''].filter(Boolean).map(t => `<span class="tag">${t}</span>`).join('');
+  story.classList.add('open');
+}
+
+document.getElementById('closeStory').onclick = () => story.classList.remove('open');
+
+document.getElementById('readFull').onclick = () => {
+  if (!activeStory) return;
+  document.getElementById('modalEra').textContent = activeStory.era || '';
+  document.getElementById('modalName').textContent = activeStory.name;
+  document.getElementById('modalLoc').textContent = `📍 ${activeStory.country} · ${activeStory.continent} · ${activeStory.year || ''}`;
+  document.getElementById('modalBody').textContent = (activeStory.summary || '') + ' Image note: ' + (activeStory.type || '') + '.';
+  document.getElementById('modal').classList.add('open');
+};
+
+document.getElementById('closeModal').onclick = () => document.getElementById('modal').classList.remove('open');
+
+document.getElementById('modal').onclick = e => {
+  if (e.target.id === 'modal') e.target.classList.remove('open');
+};
+
+function rotateQuotes() {
+  let i = 0;
+  setInterval(() => {
+    i = (i + 1) % quotes.length;
+    quoteText.classList.add('fade');
+    quoteAuthor.classList.add('fade');
+    setTimeout(() => {
+      quoteText.textContent = '“' + quotes[i].text + '”';
+      quoteAuthor.textContent = '— ' + quotes[i].author;
+      quoteText.classList.remove('fade');
+      quoteAuthor.classList.remove('fade');
+    }, 400);
+  }, 7000);
+}
+
+async function render() {
+  try {
+    const shell = document.querySelector('.map-shell');
+    const w = shell.clientWidth;
+    const h = shell.clientHeight;
+
+    svg.selectAll('*').remove();
+    markerLayer.innerHTML = '';
+    svg.attr('viewBox', `0 0 ${w} ${h}`);
+
+    const defs = svg.append('defs');
+
+    const seaGrad = defs.append('radialGradient').attr('id','seaGradient').attr('cx','50%').attr('cy','46%').attr('r','65%');
+    seaGrad.append('stop').attr('offset','0%').attr('stop-color','#4e96cb');
+    seaGrad.append('stop').attr('offset','45%').attr('stop-color','#2c6ea8');
+    seaGrad.append('stop').attr('offset','100%').attr('stop-color','#143c67');
+
+    const landGrad = defs.append('linearGradient').attr('id','landGradient').attr('x1','0').attr('y1','0').attr('x2','0').attr('y2','1');
+    landGrad.append('stop').attr('offset','0%').attr('stop-color','#e8ead8');
+    landGrad.append('stop').attr('offset','48%').attr('stop-color','#ccd3bb');
+    landGrad.append('stop').attr('offset','100%').attr('stop-color','#afbb9a');
+
+    const highGrad = defs.append('linearGradient').attr('id','highlightGradient').attr('x1','0').attr('y1','0').attr('x2','0').attr('y2','1');
+    highGrad.append('stop').attr('offset','0%').attr('stop-color','#f1e4a8');
+    highGrad.append('stop').attr('offset','100%').attr('stop-color','#ceb56f');
+
+    const filter = defs.append('filter').attr('id','shadowSoft').attr('x','-20%').attr('y','-20%').attr('width','140%').attr('height','140%');
+    filter.append('feDropShadow').attr('dx','0').attr('dy','1').attr('stdDeviation','1.4').attr('flood-color','#0b1c30').attr('flood-opacity','.22');
+
+    const projection = d3.geoNaturalEarth1().fitExtent([[4,4],[w-4,h-4]], {type:'Sphere'});
+    const path = d3.geoPath(projection);
+
+    const world = await d3.json('https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json');
+    const countries = topojson.feature(world, world.objects.countries).features;
+    const mesh = topojson.mesh(world, world.objects.countries, (a,b) => a !== b);
+
+    const vis = visible();
+    const ids = new Set(vis.map(d => d.iso));
+
+    svg.append('path').datum({type:'Sphere'}).attr('class','sea').attr('d',path);
+    svg.append('path').datum(d3.geoGraticule10()).attr('class','graticule').attr('d',path);
+
+    svg.append('g')
+      .selectAll('path')
+      .data(countries)
+      .join('path')
+      .attr('class', d => ids.has(norm(d.id)) ? 'land active' : 'land')
+      .attr('d', path);
+
+    svg.append('path').datum(mesh).attr('class','country-boundary').attr('d',path);
+
+    const labelGroup = svg.append('g');
+    [['Pacific Ocean',0.18,0.56],['Atlantic Ocean',0.49,0.48],['Indian Ocean',0.67,0.60]].forEach(([t,rx,ry]) => {
+      labelGroup.append('text').attr('class','atlas-label').attr('x',w*rx).attr('y',h*ry).text(t);
+    });
+
+    vis.forEach(s => {
+      const [x,y] = projection(s.coords);
+      const m = document.createElement('div');
+      m.className = 'marker';
+      m.style.left = x + 'px';
+      m.style.top = y + 'px';
+      m.innerHTML = `<div class="pulse"></div><button aria-label="${s.name}"><img src="${s.displayImage || s.image}" alt="${s.name}"></button><div class="label">${s.name}</div>`;
+      const im = m.querySelector('img');
+      im.addEventListener('error', () => {
+        im.src = fallback(s);
+      }, {once:true});
+      m.querySelector('button').onclick = () => openStory(s);
+      markerLayer.appendChild(m);
+    });
+
+    document.querySelector('.map-loading').style.display = 'none';
+  } catch(e) {
+    console.error(e);
+    document.querySelector('.map-loading').textContent = 'Map failed to load';
+  }
+}
+
+function renderTimeline() {
+  const arr = [...visible()].sort((a,b) => (a.sort || 0) - (b.sort || 0));
+  timelineGrid.innerHTML = arr.map(s => `<article class="time-card" data-id="${s.id}"><div class="time-year">${s.year || ''}</div><div class="time-name">${s.name}</div><div class="time-text">${s.country} · ${s.summary || ''}</div><div class="time-type">${s.type || ''} · ${s.continent}</div></article>`).join('');
+  timelineGrid.querySelectorAll('.time-card').forEach(c => c.onclick = () => {
+    const f = stories.find(s => s.id === c.dataset.id);
+    if (f) openStory(f);
+  });
+}
+
+function setView(v) {
+  const tl = v === 'timeline';
+  document.getElementById('mapTab').classList.toggle('active', !tl);
+  document.getElementById('timelineTab').classList.toggle('active', tl);
+  timelinePanel.classList.toggle('open', tl);
+  svg.style('opacity', tl ? .14 : 1);
+  markerLayer.style.display = tl ? 'none' : 'block';
+  story.classList.remove('open');
+  renderTimeline();
+}
+
+document.getElementById('mapTab').onclick = () => setView('map');
+document.getElementById('timelineTab').onclick = () => setView('timeline');
+
+makeFilters();
+renderTimeline();
+rotateQuotes();
+render();
+hydrate().then(() => {
+  render();
+  renderTimeline();
+});
+
+let timer;
+window.addEventListener('resize', () => {
+  clearTimeout(timer);
+  timer = setTimeout(render, 120);
+});
 </script>
 </body>
 </html>
