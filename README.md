@@ -1,26 +1,38 @@
-# Women of Legend · GitHub Pages
+# Women of Legend · One-Frame GitHub Pages Site
 
-Upload this folder to a GitHub repository.
+This folder contains the updated one-frame metallic-blue interactive map.
 
-## Deploy
-1. Put the `docs` folder in your repo.
-2. Go to GitHub → Settings → Pages.
-3. Choose: Deploy from branch.
-4. Branch: `main`; folder: `/docs`.
-5. Open the generated GitHub Pages URL.
+## Folder structure
 
-## Portraits
-Add portrait files to:
+```text
+docs/
+├── index.html
+└── assets/
+    └── faces/
+        ├── yaa.svg
+        ├── rani-lakshmibai.svg
+        ├── boudicca.svg
+        └── ...
+```
 
-`docs/assets/faces/`
+## Deploy on GitHub Pages
 
-Use the filenames already referenced in `index.html`, for example:
+1. Upload the `docs` folder to your GitHub repository.
+2. Go to **Settings → Pages**.
+3. Set:
+   - Source: **Deploy from a branch**
+   - Branch: **main**
+   - Folder: **/docs**
+4. Save.
 
-- yaa-asantewaa.jpg
-- rani-lakshmibai.jpg
-- boudicca.jpg
-- nanny.jpg
-- bartolina-sisa.jpg
-- tarenorerer.jpg
+Your site will be available at:
 
-Until you add images, the map will show initials as fallback icons.
+```text
+https://YOUR_USERNAME.github.io/YOUR_REPO_NAME/
+```
+
+## Notes
+
+- The current portraits are SVG placeholder icons so the folder works immediately.
+- Replace the files in `docs/assets/faces/` with real public-domain or properly licensed portraits if you want authentic images.
+- Many figures do not have real photographs, so avoid presenting generated portraits as historical photographs.

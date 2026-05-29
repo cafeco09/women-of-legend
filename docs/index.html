@@ -3,825 +3,846 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Women of Legend · Interactive Folklore Map</title>
+  <title>Women of Legend</title>
 
   <script src="https://cdn.jsdelivr.net/npm/d3@7"></script>
   <script src="https://cdn.jsdelivr.net/npm/topojson-client@3"></script>
 
   <style>
-    :root {
-      --bg: #061b3a;
-      --card: rgba(5, 22, 47, 0.94);
-      --map: #f8fafc;
-      --blue: #4ea1ff;
-      --blue-2: #2f6df6;
-      --text: #f8fafc;
-      --muted: #b7c7df;
-      --line: rgba(255,255,255,0.76);
-      --green: #25d0a6;
-      --purple: #9b7cff;
-      --shadow: 0 30px 90px rgba(0,0,0,0.42);
-      --radius: 24px;
+    :root{
+      --bg1:#03142d;
+      --bg2:#072b5f;
+      --bg3:#0a4f9a;
+      --metal1:#89c8ff;
+      --metal2:#4ea6ff;
+      --metal3:#1f5ea8;
+      --text:#f5fbff;
+      --muted:#c6dbef;
+      --line:rgba(255,255,255,0.16);
+      --glass:rgba(7,28,58,0.62);
+      --glass-2:rgba(10,37,72,0.82);
+      --country:#f7fbff;
+      --shadow:0 24px 70px rgba(0,0,0,0.35);
+      --radius:26px;
     }
 
-    * { box-sizing: border-box; }
-
-    body {
-      margin: 0;
-      min-height: 100vh;
-      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-      color: var(--text);
+    *{box-sizing:border-box}
+    html,body{
+      margin:0;
+      width:100%;
+      height:100%;
+      overflow:hidden;
+      font-family:Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
       background:
-        radial-gradient(circle at 18% 20%, rgba(54, 125, 255, 0.24), transparent 28%),
-        radial-gradient(circle at 82% 22%, rgba(37, 208, 166, 0.12), transparent 24%),
-        linear-gradient(135deg, #04152f 0%, #07214a 48%, #03142f 100%);
-      overflow-x: hidden;
+        radial-gradient(circle at 20% 18%, rgba(121,188,255,0.28), transparent 24%),
+        radial-gradient(circle at 80% 16%, rgba(38,120,216,0.32), transparent 22%),
+        radial-gradient(circle at 50% 100%, rgba(8,71,138,0.30), transparent 40%),
+        linear-gradient(145deg, var(--bg1) 0%, var(--bg2) 54%, var(--bg3) 100%);
+      color:var(--text);
     }
 
-    .shell {
-      width: min(1500px, 100%);
-      margin: 0 auto;
-      padding: 22px 28px 34px;
-    }
-
-    header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 22px;
-      padding: 10px 0 22px;
-      border-bottom: 1px solid rgba(255,255,255,0.09);
-    }
-
-    .brand {
-      display: flex;
-      align-items: center;
-      gap: 14px;
-      min-width: 300px;
-    }
-
-    .logo {
-      width: 54px;
-      height: 54px;
-      border: 1px solid rgba(255,255,255,0.55);
-      border-radius: 50%;
-      display: grid;
-      place-items: center;
-      font-size: 28px;
-      box-shadow: inset 0 0 24px rgba(255,255,255,0.12);
-    }
-
-    .brand h1 {
-      margin: 0;
-      font-family: Georgia, "Times New Roman", serif;
-      font-size: clamp(24px, 2.4vw, 38px);
-      letter-spacing: -0.04em;
-      line-height: 1;
-    }
-
-    .brand p {
-      margin: 6px 0 0;
-      color: var(--muted);
-      font-size: 14px;
-    }
-
-    nav {
-      display: flex;
-      gap: 24px;
-      align-items: center;
-      color: var(--muted);
-      font-weight: 650;
-      font-size: 14px;
-    }
-
-    nav a {
-      color: inherit;
-      text-decoration: none;
-      padding: 9px 2px;
-    }
-
-    nav a.active {
-      color: var(--blue);
-      border-bottom: 2px solid var(--blue);
-    }
-
-    .github-link {
-      color: var(--text);
-      text-decoration: none;
-      border: 1px solid rgba(255,255,255,0.18);
-      border-radius: 999px;
-      padding: 10px 14px;
-      background: rgba(255,255,255,0.05);
-      font-weight: 700;
-      font-size: 13px;
-    }
-
-    .hero {
-      display: grid;
-      grid-template-columns: 1fr;
-      gap: 18px;
-      padding-top: 24px;
-    }
-
-    .top-copy {
-      display: flex;
-      justify-content: space-between;
-      align-items: end;
-      gap: 24px;
-      padding: 0 4px;
-    }
-
-    .top-copy h2 {
-      font-family: Georgia, "Times New Roman", serif;
-      font-size: clamp(34px, 5vw, 76px);
-      line-height: 0.94;
-      letter-spacing: -0.06em;
-      margin: 0;
-      max-width: 840px;
-    }
-
-    .top-copy p {
-      margin: 0;
-      color: var(--muted);
-      line-height: 1.6;
-      max-width: 420px;
-      font-size: 15px;
-    }
-
-    .map-frame {
-      position: relative;
-      height: min(76vh, 820px);
-      min-height: 590px;
-      border: 1px solid rgba(255,255,255,0.12);
-      border-radius: 34px;
-      overflow: hidden;
-      box-shadow: var(--shadow);
+    body::before{
+      content:"";
+      position:fixed;
+      inset:0;
+      pointer-events:none;
       background:
-        radial-gradient(circle at center, rgba(70, 145, 255, 0.12), transparent 58%),
-        linear-gradient(180deg, rgba(8, 38, 83, 0.9), rgba(4, 18, 42, 0.96));
+        linear-gradient(120deg, rgba(255,255,255,0.12), transparent 18%, transparent 78%, rgba(255,255,255,0.06)),
+        radial-gradient(circle at 30% 8%, rgba(255,255,255,0.12), transparent 16%);
+      mix-blend-mode:screen;
+      opacity:0.45;
     }
 
-    .map-toolbar {
-      position: absolute;
-      z-index: 20;
-      top: 18px;
-      left: 18px;
-      right: 18px;
-      display: flex;
-      justify-content: space-between;
-      gap: 12px;
-      pointer-events: none;
+    .app{
+      width:100vw;
+      height:100vh;
+      padding:14px;
     }
 
-    .filter-row {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
-      pointer-events: auto;
-    }
-
-    .filter {
-      border: 1px solid rgba(255,255,255,0.16);
-      color: var(--muted);
-      background: rgba(3, 17, 38, 0.72);
+    .frame{
+      position:relative;
+      width:100%;
+      height:100%;
+      overflow:hidden;
+      border-radius:32px;
+      border:1px solid rgba(255,255,255,0.16);
+      background:
+        linear-gradient(180deg, rgba(255,255,255,0.06), rgba(255,255,255,0.01)),
+        radial-gradient(circle at 50% 40%, rgba(141,201,255,0.10), transparent 34%),
+        linear-gradient(180deg, rgba(5,29,61,0.88), rgba(4,24,53,0.92));
+      box-shadow:var(--shadow), inset 0 1px 0 rgba(255,255,255,0.14);
       backdrop-filter: blur(14px);
-      padding: 9px 12px;
-      border-radius: 999px;
-      cursor: pointer;
-      font-weight: 750;
-      font-size: 12px;
     }
 
-    .filter.active {
-      color: white;
-      border-color: rgba(78,161,255,0.72);
-      background: rgba(47,109,246,0.34);
-    }
-
-    .hint {
-      pointer-events: auto;
-      color: var(--muted);
-      background: rgba(3, 17, 38, 0.72);
-      backdrop-filter: blur(14px);
-      border: 1px solid rgba(255,255,255,0.14);
-      border-radius: 999px;
-      padding: 9px 13px;
-      font-size: 12px;
-      font-weight: 700;
-    }
-
-    svg#worldMap {
-      position: absolute;
-      inset: 0;
-      width: 100%;
-      height: 100%;
-    }
-
-    .country {
-      fill: var(--map);
-      stroke: rgba(6, 27, 58, 0.28);
-      stroke-width: 0.45;
-      vector-effect: non-scaling-stroke;
-    }
-
-    .country.highlight {
-      fill: #367eff;
-      stroke: rgba(255,255,255,0.45);
-      stroke-width: 0.75;
-    }
-
-    .graticule {
-      fill: none;
-      stroke: rgba(255,255,255,0.06);
-      stroke-width: 0.7;
-    }
-
-    .country-dot {
-      fill: var(--blue);
-      stroke: white;
-      stroke-width: 2;
-      filter: drop-shadow(0 0 10px rgba(78,161,255,0.95));
-      pointer-events: none;
-    }
-
-    .marker-layer {
-      position: absolute;
-      inset: 0;
-      pointer-events: none;
-      z-index: 11;
-    }
-
-    .story-pin {
-      --size: 64px;
-      position: absolute;
-      width: var(--size);
-      height: var(--size);
-      transform: translate(-50%, -50%);
-      pointer-events: auto;
-      transition: opacity 0.25s ease, transform 0.25s ease;
-    }
-
-    .portrait-button {
-      width: var(--size);
-      height: var(--size);
-      border: 2px solid rgba(255,255,255,0.72);
-      outline: 2px solid rgba(78,161,255,0.38);
-      border-radius: 50%;
-      padding: 0;
-      cursor: pointer;
-      overflow: hidden;
-      background: linear-gradient(135deg, #183b72, #071d3f);
-      box-shadow: 0 10px 34px rgba(0,0,0,0.42), 0 0 24px rgba(78,161,255,0.32);
-      display: grid;
-      place-items: center;
-      transition: transform 0.2s ease, box-shadow 0.2s ease;
-    }
-
-    .portrait-button:hover {
-      transform: scale(1.12);
-      box-shadow: 0 14px 42px rgba(0,0,0,0.48), 0 0 34px rgba(78,161,255,0.68);
-    }
-
-    .portrait-button img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-      display: block;
-      filter: saturate(0.92) contrast(1.06);
-    }
-
-    .fallback-face {
-      width: 100%;
-      height: 100%;
-      display: none;
-      place-items: center;
-      font-family: Georgia, serif;
-      font-size: 24px;
-      font-weight: 800;
-      color: white;
+    .frame::before{
+      content:"";
+      position:absolute;
+      inset:0;
+      pointer-events:none;
       background:
-        radial-gradient(circle at 34% 28%, rgba(255,255,255,0.18), transparent 28%),
-        linear-gradient(135deg, #315fa7, #071c3b);
+        linear-gradient(135deg, rgba(255,255,255,0.10), transparent 18%, transparent 82%, rgba(255,255,255,0.05));
+      opacity:0.55;
     }
 
-    .pin-label {
-      position: absolute;
-      left: 50%;
-      top: calc(100% + 8px);
-      transform: translateX(-50%);
-      width: max-content;
-      max-width: 170px;
-      text-align: center;
-      padding: 7px 9px;
-      border-radius: 14px;
-      background: rgba(3, 17, 38, 0.74);
-      border: 1px solid rgba(255,255,255,0.12);
-      backdrop-filter: blur(12px);
-      box-shadow: 0 12px 30px rgba(0,0,0,0.22);
+    .hud{
+      position:absolute;
+      inset:18px 18px auto 18px;
+      z-index:30;
+      display:flex;
+      justify-content:space-between;
+      gap:18px;
+      align-items:flex-start;
     }
 
-    .pin-label strong {
-      display: block;
-      font-family: Georgia, "Times New Roman", serif;
-      font-size: 14px;
-      line-height: 1.05;
+    .brand{
+      max-width:520px;
+      padding:14px 18px;
+      border-radius:22px;
+      border:1px solid rgba(255,255,255,0.14);
+      background:linear-gradient(180deg, rgba(10,39,76,0.88), rgba(7,26,53,0.76));
+      backdrop-filter:blur(16px);
+      box-shadow:var(--shadow);
     }
 
-    .pin-label span {
-      display: block;
-      color: var(--muted);
-      font-size: 11px;
-      margin-top: 3px;
-      font-weight: 700;
+    .brand h1{
+      margin:0;
+      font-family:Georgia, "Times New Roman", serif;
+      font-size:clamp(28px,3.2vw,46px);
+      line-height:0.95;
+      letter-spacing:-0.05em;
     }
 
-    .story-card {
-      position: absolute;
-      z-index: 30;
-      width: min(620px, calc(100% - 36px));
-      right: 28px;
-      bottom: 28px;
-      border-radius: var(--radius);
-      background: linear-gradient(145deg, rgba(5,22,47,0.96), rgba(9,33,70,0.92));
-      border: 1px solid rgba(255,255,255,0.16);
-      box-shadow: var(--shadow);
-      padding: 18px;
-      display: grid;
-      grid-template-columns: 190px 1fr;
-      gap: 18px;
-      opacity: 0;
-      transform: translateY(18px);
-      pointer-events: none;
-      transition: 0.25s ease;
+    .brand p{
+      margin:8px 0 0;
+      color:var(--muted);
+      line-height:1.5;
+      font-size:14px;
     }
 
-    .story-card.open {
-      opacity: 1;
-      transform: translateY(0);
-      pointer-events: auto;
+    .quote-box{
+      width:min(430px, 34vw);
+      min-height:110px;
+      padding:16px 18px;
+      border-radius:22px;
+      border:1px solid rgba(255,255,255,0.14);
+      background:linear-gradient(180deg, rgba(13,46,89,0.84), rgba(7,25,50,0.74));
+      backdrop-filter:blur(16px);
+      box-shadow:var(--shadow);
+      display:flex;
+      flex-direction:column;
+      justify-content:center;
     }
 
-    .story-card img {
-      width: 100%;
-      height: 250px;
-      border-radius: 18px;
-      object-fit: cover;
-      background: #10294f;
+    .quote-label{
+      text-transform:uppercase;
+      font-size:11px;
+      letter-spacing:0.14em;
+      color:#9fd2ff;
+      font-weight:800;
+      margin-bottom:8px;
     }
 
-    .story-copy { min-width: 0; }
-
-    .eyebrow {
-      color: var(--blue);
-      font-weight: 850;
-      text-transform: uppercase;
-      font-size: 12px;
-      letter-spacing: 0.12em;
+    .quote-text{
+      font-family:Georgia, "Times New Roman", serif;
+      font-size:20px;
+      line-height:1.35;
+      color:#f7fbff;
+      opacity:0;
+      transform:translateY(6px);
+      transition:opacity 1.1s ease, transform 1.1s ease;
+      min-height:54px;
     }
 
-    .story-copy h3 {
-      margin: 8px 0 4px;
-      font-family: Georgia, "Times New Roman", serif;
-      font-size: 36px;
-      line-height: 0.95;
-      letter-spacing: -0.05em;
+    .quote-text.show{
+      opacity:1;
+      transform:translateY(0);
     }
 
-    .location {
-      color: var(--blue);
-      font-weight: 800;
-      margin-bottom: 12px;
+    .quote-author{
+      margin-top:10px;
+      font-size:12px;
+      color:#b6d6f5;
+      font-weight:700;
+      opacity:0;
+      transform:translateY(6px);
+      transition:opacity 1.1s ease, transform 1.1s ease;
     }
 
-    .story-copy p {
-      margin: 0;
-      color: #dce8f8;
-      line-height: 1.58;
-      font-size: 14px;
+    .quote-author.show{
+      opacity:1;
+      transform:translateY(0);
     }
 
-    .tags {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
-      margin-top: 14px;
+    .controls{
+      position:absolute;
+      left:18px;
+      right:18px;
+      bottom:18px;
+      z-index:28;
+      display:flex;
+      justify-content:space-between;
+      gap:16px;
+      align-items:flex-end;
     }
 
-    .tag {
-      font-size: 12px;
-      font-weight: 800;
-      padding: 7px 10px;
-      border-radius: 10px;
-      border: 1px solid rgba(255,255,255,0.14);
-      background: rgba(255,255,255,0.06);
-      color: #eaf3ff;
+    .legend{
+      display:flex;
+      gap:10px;
+      align-items:center;
+      flex-wrap:wrap;
+      padding:12px 14px;
+      border-radius:18px;
+      border:1px solid rgba(255,255,255,0.14);
+      background:rgba(7,28,58,0.72);
+      backdrop-filter:blur(14px);
+      box-shadow:var(--shadow);
+      color:var(--muted);
+      font-size:12px;
+      font-weight:700;
+      max-width:420px;
     }
 
-    .tag.blue { background: rgba(78,161,255,0.17); color: #8fc7ff; }
-    .tag.green { background: rgba(37,208,166,0.15); color: #85f0d6; }
-    .tag.purple { background: rgba(155,124,255,0.16); color: #cabdff; }
-
-    .story-actions {
-      margin-top: 16px;
-      display: flex;
-      gap: 10px;
-      flex-wrap: wrap;
-      align-items: center;
+    .dot{
+      width:10px;
+      height:10px;
+      border-radius:50%;
+      background:#66b6ff;
+      box-shadow:0 0 14px rgba(102,182,255,0.85);
     }
 
-    .story-actions button {
-      border: 1px solid rgba(78,161,255,0.34);
-      background: rgba(78,161,255,0.12);
-      color: white;
-      border-radius: 999px;
-      padding: 10px 13px;
-      font-weight: 850;
-      cursor: pointer;
+    .filter-wrap{
+      display:flex;
+      flex-wrap:wrap;
+      gap:8px;
+      justify-content:flex-end;
+      max-width:720px;
     }
 
-    .close-card {
-      position: absolute;
-      right: 12px;
-      top: 12px;
-      width: 34px;
-      height: 34px;
-      border-radius: 50%;
-      border: 1px solid rgba(255,255,255,0.24);
-      color: white;
-      background: rgba(0,0,0,0.18);
-      cursor: pointer;
-      font-size: 18px;
+    .filter-btn{
+      border:none;
+      cursor:pointer;
+      color:#d8e9f7;
+      background:linear-gradient(180deg, rgba(20,73,135,0.84), rgba(10,39,75,0.84));
+      border:1px solid rgba(255,255,255,0.14);
+      border-radius:999px;
+      padding:10px 14px;
+      font-size:12px;
+      font-weight:800;
+      box-shadow:inset 0 1px 0 rgba(255,255,255,0.12);
     }
 
-    .side-panel {
-      position: absolute;
-      z-index: 28;
-      left: 18px;
-      bottom: 18px;
-      width: min(380px, calc(100% - 36px));
-      max-height: 44%;
-      overflow: auto;
-      padding: 14px;
-      background: rgba(3, 17, 38, 0.70);
-      border: 1px solid rgba(255,255,255,0.12);
-      border-radius: 22px;
-      backdrop-filter: blur(16px);
+    .filter-btn.active{
+      background:linear-gradient(180deg, rgba(108,189,255,0.36), rgba(27,96,169,0.92));
+      color:#fff;
     }
 
-    .side-panel h3 {
-      margin: 0 0 10px;
-      font-family: Georgia, serif;
-      font-size: 22px;
+    #map{
+      position:absolute;
+      inset:0;
+      width:100%;
+      height:100%;
+      z-index:1;
     }
 
-    .mini-list { display: grid; gap: 8px; }
-
-    .mini-item {
-      display: grid;
-      grid-template-columns: 38px 1fr;
-      gap: 10px;
-      align-items: center;
-      border: 1px solid rgba(255,255,255,0.08);
-      background: rgba(255,255,255,0.045);
-      border-radius: 14px;
-      padding: 8px;
-      cursor: pointer;
-      color: white;
-      text-align: left;
+    .country{
+      fill:var(--country);
+      stroke:rgba(4,33,76,0.24);
+      stroke-width:0.6;
+      vector-effect:non-scaling-stroke;
     }
 
-    .mini-avatar {
-      width: 38px;
-      height: 38px;
-      border-radius: 50%;
-      background: #153d78;
-      display: grid;
-      place-items: center;
-      font-family: Georgia, serif;
-      font-weight: 900;
+    .country.active{
+      fill:#7fc2ff;
+      stroke:rgba(255,255,255,0.60);
+      stroke-width:0.95;
     }
 
-    .mini-item strong { display: block; font-size: 13px; }
-    .mini-item span { display: block; color: var(--muted); font-size: 11px; margin-top: 2px; }
-
-    .full-layer {
-      position: fixed;
-      z-index: 80;
-      inset: 0;
-      padding: 24px;
-      display: none;
-      align-items: center;
-      justify-content: center;
-      background: rgba(1, 8, 19, 0.76);
-      backdrop-filter: blur(12px);
+    .graticule{
+      fill:none;
+      stroke:rgba(255,255,255,0.07);
+      stroke-width:0.7;
     }
 
-    .full-layer.open { display: flex; }
-
-    .full-story {
-      width: min(850px, 100%);
-      max-height: min(82vh, 820px);
-      overflow: auto;
-      background: linear-gradient(145deg, #071b38, #0b2c60);
-      border: 1px solid rgba(255,255,255,0.16);
-      border-radius: 28px;
-      box-shadow: var(--shadow);
-      padding: 28px;
-      position: relative;
+    .marker-layer{
+      position:absolute;
+      inset:0;
+      z-index:16;
+      pointer-events:none;
     }
 
-    .full-story h2 {
-      font-family: Georgia, serif;
-      margin: 8px 0 12px;
-      font-size: clamp(34px, 5vw, 56px);
-      line-height: 0.95;
-      letter-spacing: -0.06em;
+    .marker{
+      position:absolute;
+      width:54px;
+      height:54px;
+      transform:translate(-50%,-50%);
+      pointer-events:auto;
     }
 
-    .full-story p {
-      color: #dce8f8;
-      line-height: 1.75;
-      font-size: 16px;
+    .marker-btn{
+      width:54px;
+      height:54px;
+      border-radius:50%;
+      overflow:hidden;
+      border:2px solid rgba(255,255,255,0.84);
+      outline:2px solid rgba(92,177,255,0.50);
+      background:linear-gradient(145deg, rgba(111,196,255,0.35), rgba(23,84,148,0.94));
+      box-shadow:
+        0 12px 28px rgba(0,0,0,0.30),
+        0 0 18px rgba(98,184,255,0.54),
+        inset 0 2px 8px rgba(255,255,255,0.22);
+      cursor:pointer;
+      padding:0;
+      display:grid;
+      place-items:center;
+      transition:transform .22s ease, box-shadow .22s ease;
     }
 
-    .full-story .close-layer {
-      position: absolute;
-      right: 18px;
-      top: 18px;
-      width: 38px;
-      height: 38px;
-      border-radius: 50%;
-      border: 1px solid rgba(255,255,255,0.22);
-      background: rgba(255,255,255,0.06);
-      color: white;
-      cursor: pointer;
-      font-size: 18px;
+    .marker-btn:hover{
+      transform:scale(1.08);
+      box-shadow:
+        0 16px 32px rgba(0,0,0,0.34),
+        0 0 24px rgba(98,184,255,0.75),
+        inset 0 2px 10px rgba(255,255,255,0.28);
     }
 
-    .note {
-      margin: 18px 0 0;
-      color: var(--muted);
-      line-height: 1.7;
-      font-size: 13px;
+    .marker-btn img{
+      width:100%;
+      height:100%;
+      object-fit:cover;
+      display:block;
     }
 
-    @media (max-width: 900px) {
-      .shell { padding: 16px; }
-      header, .top-copy { align-items: flex-start; flex-direction: column; }
-      nav { overflow-x: auto; width: 100%; padding-bottom: 4px; }
-      .map-frame { height: 760px; }
-      .story-card {
-        grid-template-columns: 1fr;
-        right: 14px;
-        left: 14px;
-        bottom: 14px;
+    .fallback{
+      display:none;
+      width:100%;
+      height:100%;
+      place-items:center;
+      font-family:Georgia, serif;
+      font-size:20px;
+      font-weight:800;
+      color:white;
+      background:
+        radial-gradient(circle at 30% 30%, rgba(255,255,255,0.18), transparent 22%),
+        linear-gradient(145deg, rgba(118,203,255,0.35), rgba(23,84,148,0.98));
+    }
+
+    .pulse{
+      position:absolute;
+      inset:-7px;
+      border-radius:50%;
+      border:1px solid rgba(126,199,255,0.38);
+      animation:pulse 2.6s infinite;
+      pointer-events:none;
+    }
+
+    @keyframes pulse{
+      0%{transform:scale(0.92); opacity:0.88}
+      70%{transform:scale(1.22); opacity:0}
+      100%{transform:scale(1.22); opacity:0}
+    }
+
+    .marker-label{
+      position:absolute;
+      left:50%;
+      top:58px;
+      transform:translateX(-50%);
+      white-space:nowrap;
+      font-size:10px;
+      font-weight:800;
+      color:#f0f8ff;
+      background:rgba(7,28,58,0.82);
+      border:1px solid rgba(255,255,255,0.12);
+      border-radius:999px;
+      padding:5px 8px;
+      opacity:0;
+      transition:opacity .22s ease;
+      pointer-events:none;
+    }
+
+    .marker:hover .marker-label{
+      opacity:1;
+    }
+
+    .story-card{
+      position:absolute;
+      right:18px;
+      top:158px;
+      width:min(430px, 32vw);
+      min-height:320px;
+      max-height:calc(100% - 290px);
+      z-index:24;
+      border-radius:24px;
+      overflow:hidden;
+      border:1px solid rgba(255,255,255,0.16);
+      background:linear-gradient(180deg, rgba(9,35,69,0.94), rgba(6,24,48,0.92));
+      box-shadow:var(--shadow);
+      backdrop-filter:blur(16px);
+      display:flex;
+      flex-direction:column;
+      opacity:0;
+      transform:translateX(20px);
+      pointer-events:none;
+      transition:opacity .28s ease, transform .28s ease;
+    }
+
+    .story-card.open{
+      opacity:1;
+      transform:translateX(0);
+      pointer-events:auto;
+    }
+
+    .story-top{
+      display:grid;
+      grid-template-columns:112px 1fr;
+      gap:14px;
+      padding:16px;
+      border-bottom:1px solid rgba(255,255,255,0.08);
+    }
+
+    .story-top img{
+      width:112px;
+      height:112px;
+      border-radius:18px;
+      object-fit:cover;
+      background:#14355d;
+    }
+
+    .story-eyebrow{
+      color:#9fd2ff;
+      font-size:11px;
+      font-weight:800;
+      text-transform:uppercase;
+      letter-spacing:0.12em;
+    }
+
+    .story-name{
+      margin:6px 0 4px;
+      font-family:Georgia, serif;
+      font-size:32px;
+      line-height:0.95;
+      letter-spacing:-0.05em;
+    }
+
+    .story-loc{
+      color:#80c5ff;
+      font-weight:800;
+      font-size:13px;
+    }
+
+    .story-body{
+      padding:16px;
+      display:flex;
+      flex-direction:column;
+      gap:12px;
+      min-height:0;
+      overflow:hidden;
+    }
+
+    .story-summary{
+      color:#e5f1fb;
+      line-height:1.58;
+      font-size:14px;
+      display:-webkit-box;
+      -webkit-line-clamp:6;
+      -webkit-box-orient:vertical;
+      overflow:hidden;
+    }
+
+    .tag-row{
+      display:flex;
+      gap:8px;
+      flex-wrap:wrap;
+    }
+
+    .tag{
+      padding:7px 10px;
+      border-radius:10px;
+      font-size:11px;
+      font-weight:800;
+      border:1px solid rgba(255,255,255,0.12);
+      background:rgba(255,255,255,0.06);
+      color:#eef7ff;
+    }
+
+    .story-actions{
+      margin-top:auto;
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+    }
+
+    .story-actions button{
+      border:none;
+      cursor:pointer;
+      border-radius:999px;
+      padding:11px 14px;
+      font-size:12px;
+      font-weight:800;
+      color:white;
+      background:linear-gradient(180deg, rgba(102,182,255,0.32), rgba(31,94,168,0.92));
+      border:1px solid rgba(255,255,255,0.14);
+      box-shadow:inset 0 1px 0 rgba(255,255,255,0.12);
+    }
+
+    .close-story{
+      position:absolute;
+      top:10px;
+      right:10px;
+      width:32px;
+      height:32px;
+      border-radius:50%;
+      border:1px solid rgba(255,255,255,0.15);
+      background:rgba(255,255,255,0.06);
+      color:white;
+      font-size:18px;
+      cursor:pointer;
+    }
+
+    .story-modal{
+      position:absolute;
+      inset:0;
+      z-index:40;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      padding:24px;
+      background:rgba(2,11,24,0.56);
+      backdrop-filter:blur(8px);
+      opacity:0;
+      pointer-events:none;
+      transition:opacity .24s ease;
+    }
+
+    .story-modal.open{
+      opacity:1;
+      pointer-events:auto;
+    }
+
+    .modal-card{
+      width:min(720px, 88vw);
+      border-radius:28px;
+      padding:24px;
+      border:1px solid rgba(255,255,255,0.16);
+      background:linear-gradient(180deg, rgba(11,41,80,0.95), rgba(6,23,45,0.94));
+      box-shadow:var(--shadow);
+      max-height:82vh;
+      overflow:hidden;
+      position:relative;
+    }
+
+    .modal-card h2{
+      margin:8px 0 8px;
+      font-family:Georgia, serif;
+      font-size:clamp(34px,4.8vw,54px);
+      line-height:0.96;
+      letter-spacing:-0.06em;
+    }
+
+    .modal-card p{
+      color:#e5f1fb;
+      line-height:1.75;
+      font-size:15px;
+      margin:0;
+    }
+
+    .close-modal{
+      position:absolute;
+      top:14px;
+      right:14px;
+      width:36px;
+      height:36px;
+      border-radius:50%;
+      border:1px solid rgba(255,255,255,0.15);
+      background:rgba(255,255,255,0.06);
+      color:white;
+      font-size:18px;
+      cursor:pointer;
+    }
+
+    @media (max-width: 1200px){
+      .quote-box{width:360px}
+      .story-card{width:380px}
+    }
+
+    @media (max-width: 980px){
+      .hud{
+        flex-direction:column;
+        align-items:stretch;
       }
-      .story-card img { height: 180px; }
-      .side-panel { display: none; }
-      .pin-label { display: none; }
-      .story-pin { --size: 48px; }
-      .hint { display: none; }
+      .quote-box{
+        width:100%;
+        min-height:90px;
+      }
+      .story-card{
+        width:min(92vw, 420px);
+        right:14px;
+        top:auto;
+        bottom:88px;
+        max-height:320px;
+      }
+      .controls{
+        flex-direction:column;
+        align-items:stretch;
+      }
+      .filter-wrap{
+        justify-content:flex-start;
+      }
+      .legend{
+        max-width:none;
+      }
+      .marker{
+        width:46px;height:46px;
+      }
+      .marker-btn{
+        width:46px;height:46px;
+      }
+      .marker-label{display:none}
+    }
+
+    @media (max-width: 640px){
+      .app{padding:8px}
+      .frame{border-radius:20px}
+      .brand h1{font-size:30px}
+      .brand p{font-size:12px}
+      .quote-text{font-size:17px}
+      .story-top{grid-template-columns:84px 1fr}
+      .story-top img{width:84px;height:84px}
+      .story-name{font-size:24px}
+      .story-card{bottom:72px}
+      .filter-btn{padding:8px 10px;font-size:11px}
     }
   </style>
 </head>
-
 <body>
-  <main class="shell">
-    <header>
-      <div class="brand">
-        <div class="logo">✧</div>
-        <div>
+  <div class="app">
+    <div class="frame">
+      <div class="hud">
+        <div class="brand">
           <h1>Women of Legend</h1>
-          <p>Stories of courage, resistance and women’s agency across continents.</p>
-        </div>
-      </div>
-
-      <nav>
-        <a href="#" class="active">Map</a>
-        <a href="#stories">Stories</a>
-        <a href="#timeline">Timeline</a>
-        <a href="#about">About</a>
-      </nav>
-
-      <a class="github-link" href="#" target="_blank" rel="noreferrer">GitHub Pages</a>
-    </header>
-
-    <section class="hero">
-      <div class="top-copy">
-        <h2>Folklore, resistance and women who refused silence.</h2>
-        <p>
-          Explore stories where women appear as rulers, rebels, healers, warriors,
-          diplomats and symbols of freedom. Click a face on the map to open the storyline.
-        </p>
-      </div>
-
-      <section class="map-frame" id="mapFrame">
-        <div class="map-toolbar">
-          <div class="filter-row" id="filters"></div>
-          <div class="hint">Click a portrait to open the folklore layer</div>
-        </div>
-
-        <svg id="worldMap" aria-label="Interactive world map"></svg>
-        <div class="marker-layer" id="markerLayer"></div>
-
-        <aside class="side-panel" id="stories">
-          <h3>Stories</h3>
-          <div class="mini-list" id="miniList"></div>
-          <p class="note">
-            Note: some figures are historical, some are mythologised, and some are primarily oral-tradition figures.
-            Treat “rights” here as agency, resistance, sovereignty and dignity rather than only modern legal rights.
+          <p>
+            Folklore, resistance and women’s agency across continents.
+            Click a portrait on the map to open the story layer.
           </p>
-        </aside>
+        </div>
 
-        <article class="story-card" id="storyCard" aria-live="polite">
-          <button class="close-card" id="closeCard" aria-label="Close story card">×</button>
-          <img id="cardImg" alt="" />
-          <div class="story-copy">
-            <div class="eyebrow" id="cardEra"></div>
-            <h3 id="cardName"></h3>
-            <div class="location" id="cardLocation"></div>
-            <p id="cardSummary"></p>
-            <div class="tags" id="cardTags"></div>
-            <div class="story-actions">
-              <button id="readFull">Read full story →</button>
-            </div>
+        <div class="quote-box">
+          <div class="quote-label">Voices on women’s rights</div>
+          <div id="quoteText" class="quote-text"></div>
+          <div id="quoteAuthor" class="quote-author"></div>
+        </div>
+      </div>
+
+      <svg id="map" aria-label="World map"></svg>
+      <div id="markerLayer" class="marker-layer"></div>
+
+      <div id="storyCard" class="story-card">
+        <button id="closeStory" class="close-story" aria-label="Close">×</button>
+        <div class="story-top">
+          <img id="storyImage" alt="" />
+          <div>
+            <div id="storyEyebrow" class="story-eyebrow"></div>
+            <div id="storyName" class="story-name"></div>
+            <div id="storyLoc" class="story-loc"></div>
           </div>
-        </article>
-      </section>
-    </section>
-  </main>
+        </div>
+        <div class="story-body">
+          <div id="storySummary" class="story-summary"></div>
+          <div id="storyTags" class="tag-row"></div>
+          <div class="story-actions">
+            <button id="openModalBtn">Read full story</button>
+          </div>
+        </div>
+      </div>
 
-  <section class="full-layer" id="fullLayer">
-    <article class="full-story">
-      <button class="close-layer" id="closeLayer" aria-label="Close full story">×</button>
-      <div class="eyebrow" id="fullEra"></div>
-      <h2 id="fullName"></h2>
-      <div class="location" id="fullLocation"></div>
-      <p id="fullBody"></p>
-    </article>
-  </section>
+      <div id="storyModal" class="story-modal">
+        <div class="modal-card">
+          <button id="closeModal" class="close-modal" aria-label="Close">×</button>
+          <div id="modalEyebrow" class="story-eyebrow"></div>
+          <h2 id="modalTitle"></h2>
+          <div id="modalLoc" class="story-loc" style="margin-bottom:14px;"></div>
+          <p id="modalBody"></p>
+        </div>
+      </div>
+
+      <div class="controls">
+        <div class="legend">
+          <span class="dot"></span>
+          Portrait markers are placed at their country coordinates. Blue-highlighted countries are active folklore locations.
+        </div>
+        <div id="filters" class="filter-wrap"></div>
+      </div>
+    </div>
+  </div>
 
   <script>
-    const stories = [
-      { id:"yaa-asantewaa", name:"Yaa Asantewaa", country:"Ghana", continent:"Africa", coords:[-1.02,7.95], iso:"288", era:"The Asante Queen", image:"assets/faces/yaa-asantewaa.jpg", initials:"YA", tags:["Resistance","Leadership","Folklore"], summary:"In 1900, when British forces demanded the Golden Stool from the Asante, Queen Mother Yaa Asantewaa rallied her people and led a fierce resistance.", body:"Yaa Asantewaa is remembered as a queen mother, strategist and symbol of Asante resistance. Her story is not simply about a woman entering a male sphere of battle. It is about political legitimacy, cultural sovereignty and the right of a people to protect the sacred symbols that held their society together. In folklore and public memory, she becomes a figure of courage: a woman who refused to accept humiliation as destiny." },
-      { id:"amina", name:"Queen Amina", country:"Nigeria", continent:"Africa", coords:[7.72,11.08], iso:"566", era:"Hausa Warrior Queen", image:"assets/faces/amina.jpg", initials:"QA", tags:["Rule","Strategy","Legend"], summary:"Queen Amina of Zazzau is remembered as a military leader whose story challenges narrow ideas of female authority.", body:"Queen Amina sits between chronicle, oral tradition and legend. She is often remembered as a formidable ruler who expanded Zazzau’s influence and commanded armies. The feminist value of her story is not that she fought for modern gender rights, but that her memory preserves an older image of women as sovereign, strategic and politically powerful." },
-      { id:"mekatilili", name:"Mekatilili wa Menza", country:"Kenya", continent:"Africa", coords:[39.85,-3.63], iso:"404", era:"Giriama Resistance", image:"assets/faces/mekatilili.jpg", initials:"MM", tags:["Anti-colonial","Oral Tradition","Leadership"], summary:"Mekatilili is remembered for mobilising Giriama resistance against colonial labour demands and cultural domination.", body:"Mekatilili wa Menza’s story is carried through performance, memory and resistance history. She is remembered as a woman who used speech, movement and cultural authority to mobilise her people. Her story links women’s agency with land, labour, culture and the refusal to be governed without consent." },
-      { id:"agojie", name:"Agojie", country:"Benin", continent:"Africa", coords:[2.31,9.31], iso:"204", era:"Dahomey Women Warriors", image:"assets/faces/agojie.jpg", initials:"AG", tags:["Warriors","State Power","Complex History"], summary:"The Agojie were an all-female military regiment of Dahomey, remembered for discipline, power and combat skill.", body:"The Agojie complicate simple empowerment stories. They show women occupying elite martial roles, but their state context was also tied to conquest and the slave trade. A rigorous interpretation should hold both truths: their existence challenges gender assumptions, while the political system around them should not be romanticised." },
-      { id:"arawelo", name:"Queen Arawelo", country:"Somalia", continent:"Africa", coords:[46.19,5.15], iso:"706", era:"Somali Legendary Queen", image:"assets/faces/arawelo.jpg", initials:"AR", tags:["Myth","Patriarchy","Rule"], summary:"Arawelo appears in Somali legend as a powerful queen whose story is interpreted as either feminist resistance or tyrannical rule.", body:"Queen Arawelo is a contested figure. Some readings frame her as a woman who resisted patriarchal dominance; others frame her rule as excessive or dangerous. That tension is precisely why the story is useful: it shows how folklore can preserve anxiety around female authority as well as admiration for it." },
-
-      { id:"mulan", name:"Hua Mulan", country:"China", continent:"Asia", coords:[104.19,35.86], iso:"156", era:"Ballad of Mulan", image:"assets/faces/mulan.jpg", initials:"HM", tags:["Disguise","Duty","Legend"], summary:"Mulan takes her father’s place in war, challenging assumptions about courage, gender and public duty.", body:"Mulan’s story is often simplified as a girl-power warrior tale, but the deeper theme is more complex: filial duty, social disguise, honour and the instability of gender roles under pressure. She does not fight for a legal right; she exposes the weakness of the assumption that public courage belongs only to men." },
-      { id:"trung-sisters", name:"Trưng Sisters", country:"Vietnam", continent:"Asia", coords:[105.83,21.03], iso:"704", era:"Rebellion Leaders", image:"assets/faces/trung-sisters.jpg", initials:"TS", tags:["Rebellion","Sovereignty","Sisters"], summary:"The Trưng Sisters led rebellion against Han domination and became symbols of Vietnamese independence and female leadership.", body:"The Trưng Sisters are remembered as national heroines because their rebellion joins women’s leadership with collective freedom. Their story matters because it resists the idea that anti-colonial or anti-imperial struggle is inherently masculine. In cultural memory, they become founders of political courage." },
-      { id:"lakshmibai", name:"Rani Lakshmibai", country:"India", continent:"Asia", coords:[78.57,25.45], iso:"356", era:"Queen of Jhansi", image:"assets/faces/rani-lakshmibai.jpg", initials:"RL", tags:["Rebellion","Sovereignty","Courage"], summary:"Rani Lakshmibai is remembered as a queen who fought against British colonial power during the 1857 uprising.", body:"Rani Lakshmibai’s memory lives in poetry, patriotic folklore and public history. Her story is powerful because it fuses motherhood, sovereignty, military courage and refusal. A serious reading should not reduce her to a symbol alone: she was also a political actor responding to colonial annexation and questions of legitimacy." },
-      { id:"tomoe-gozen", name:"Tomoe Gozen", country:"Japan", continent:"Asia", coords:[138.25,36.20], iso:"392", era:"Warrior of the Heike", image:"assets/faces/tomoe-gozen.jpg", initials:"TG", tags:["Warrior","Legend","Honour"], summary:"Tomoe Gozen is remembered as a woman warrior associated with courage, martial honour and battlefield skill.", body:"Tomoe Gozen occupies the border between literary memory and history. Her value in this project is symbolic: she disrupts the assumption that martial honour was exclusively male. But she should be treated carefully, because legendary warrior women can be shaped by later storytelling as much as by historical record." },
-      { id:"gabriela-silang", name:"Gabriela Silang", country:"Philippines", continent:"Asia", coords:[120.98,14.60], iso:"608", era:"Revolutionary Leader", image:"assets/faces/gabriela-silang.jpg", initials:"GS", tags:["Revolt","Anti-colonial","Leadership"], summary:"Gabriela Silang took command of revolt against Spanish rule and became a symbol of revolutionary female leadership.", body:"Gabriela Silang’s story is often told as courage after loss, but it is more than widowhood turned into rebellion. Her memory shows a woman stepping into command, organising resistance and becoming a durable symbol of anti-colonial agency." },
-
-      { id:"boudicca", name:"Boudicca", country:"Britain", continent:"Europe", coords:[0.12,52.20], iso:"826", era:"Iceni Queen", image:"assets/faces/boudicca.jpg", initials:"BO", tags:["Revolt","Justice","Sovereignty"], summary:"Boudicca led revolt against Roman rule after violence against her family and people.", body:"Boudicca is remembered as a queen who turned private violation into public revolt. Her story has been repeatedly reshaped by politics and nationalism, so it should not be read naively. Still, the core theme is powerful: a woman refuses imperial humiliation and becomes a symbol of justice, rage and sovereignty." },
-      { id:"joan", name:"Joan of Arc", country:"France", continent:"Europe", coords:[2.21,46.23], iso:"250", era:"Saint and Soldier", image:"assets/faces/joan.jpg", initials:"JA", tags:["Faith","War","Mythologised"], summary:"Joan of Arc became a symbol of faith, courage and national liberation.", body:"Joan of Arc is both historical and heavily mythologised. Her story challenges class and gender expectations: a young peasant woman claims divine authority, enters military politics and becomes impossible to ignore. Her memory has been used by many political traditions, so interpretation requires caution." },
-      { id:"grace-omalley", name:"Grace O’Malley", country:"Ireland", continent:"Europe", coords:[-9.06,53.80], iso:"372", era:"Pirate Queen", image:"assets/faces/grace-omalley.jpg", initials:"GO", tags:["Sea Power","Autonomy","Clan Leadership"], summary:"Grace O’Malley is remembered as a sea captain and clan leader who defended political and maritime autonomy.", body:"Grace O’Malley’s legend matters because it gives a woman command over ships, negotiation and territory. She is not merely a romantic pirate figure; she represents leadership in a world of clan politics, maritime power and imperial pressure." },
-      { id:"maria-pita", name:"María Pita", country:"Spain", continent:"Europe", coords:[-8.41,43.36], iso:"724", era:"Defender of A Coruña", image:"assets/faces/maria-pita.jpg", initials:"MP", tags:["Defence","Civic Courage","Memory"], summary:"María Pita is remembered for defending A Coruña and becoming a symbol of civic courage.", body:"María Pita’s story shows how an ordinary woman can be converted into a civic legend. The rights frame is indirect here: the story is less about legal equality and more about public action, courage and the right to defend a community." },
-      { id:"brites", name:"Brites de Almeida", country:"Portugal", continent:"Europe", coords:[-8.22,39.66], iso:"620", era:"The Baker of Aljubarrota", image:"assets/faces/brites.jpg", initials:"BA", tags:["Folklore","Resistance","Working Woman"], summary:"Brites de Almeida is a legendary baker said to have fought invading soldiers.", body:"Brites de Almeida is useful because she is not framed as royal or aristocratic. She is an ordinary working woman elevated by folklore into a figure of national resistance. The story is folkloric, but symbolically strong." },
-
-      { id:"adelita", name:"La Adelita", country:"Mexico", continent:"North America", coords:[-102.55,23.63], iso:"484", era:"Soldadera Symbol", image:"assets/faces/adelita.jpg", initials:"LA", tags:["Revolution","Contested Memory","Song"], summary:"La Adelita represents women’s participation in the Mexican Revolution, though often through romanticised male storytelling.", body:"La Adelita is a symbol rather than one fixed historical person. She represents the soldaderas: women who cooked, nursed, carried supplies, fought and endured the revolution. A sceptical reading is important because the symbol can romanticise women’s labour while hiding the hardship and exploitation behind it." },
-      { id:"nanny", name:"Nanny of the Maroons", country:"Jamaica", continent:"North America", coords:[-77.30,18.10], iso:"388", era:"Maroon Leader", image:"assets/faces/nanny.jpg", initials:"NM", tags:["Freedom","Anti-slavery","Oral Tradition"], summary:"Nanny of the Maroons is remembered for guerrilla leadership and anti-slavery resistance.", body:"Nanny of the Maroons is remembered as a leader, strategist and spiritual figure in Jamaican Maroon resistance. Her story is central to freedom memory because it places a Black woman at the heart of anti-slavery struggle, tactical intelligence and community survival." },
-      { id:"tubman", name:"Harriet Tubman", country:"United States", continent:"North America", coords:[-76.08,38.88], iso:"840", era:"Moses of Her People", image:"assets/faces/harriet-tubman.jpg", initials:"HT", tags:["Freedom","Abolition","Suffrage"], summary:"Harriet Tubman became a freedom legend through escape, rescue, abolitionist work and later suffrage support.", body:"Harriet Tubman is historical, but also mythologised in public memory. Her story belongs here because she turned survival into organised liberation. The strongest rights frame is freedom from slavery, bodily autonomy, movement, dignity and later political voice." },
-      { id:"thanadelthur", name:"Thanadelthur", country:"Canada", continent:"North America", coords:[-96.82,58.77], iso:"124", era:"Dene Diplomat", image:"assets/faces/thanadelthur.jpg", initials:"TH", tags:["Diplomacy","Peace","Survival"], summary:"Thanadelthur is remembered as a Dene woman who escaped captivity and became a peace-maker and diplomat.", body:"Thanadelthur’s story expands the project beyond warriors. She represents negotiation, translation, survival and political intelligence. Her agency was diplomatic rather than martial, which makes her especially useful for a broader map of women’s power." },
-      { id:"anacaona", name:"Anacaona", country:"Haiti", continent:"North America", coords:[-72.29,18.97], iso:"332", era:"Taíno Cacica", image:"assets/faces/anacaona.jpg", initials:"AN", tags:["Indigenous Rule","Colonial Violence","Memory"], summary:"Anacaona is remembered as a Taíno ruler and cultural figure under Spanish colonial violence.", body:"Anacaona’s memory is both political and poetic. She is remembered as a ruler, a cultural figure and a victim of colonial violence. Her story links women’s leadership with Indigenous sovereignty and the trauma of conquest." },
-
-      { id:"dandara", name:"Dandara dos Palmares", country:"Brazil", continent:"South America", coords:[-36.53,-9.17], iso:"076", era:"Palmares Warrior", image:"assets/faces/dandara.jpg", initials:"DP", tags:["Anti-slavery","Quilombo","Resistance"], summary:"Dandara is remembered as a warrior associated with Palmares and Afro-Brazilian resistance.", body:"Dandara dos Palmares is symbolically powerful, though historical details are debated. Her story belongs in a careful dataset because she represents resistance to enslavement, community defence and Black women’s place in freedom memory." },
-      { id:"bartolina", name:"Bartolina Sisa", country:"Bolivia", continent:"South America", coords:[-68.15,-16.50], iso:"068", era:"Aymara Rebel Leader", image:"assets/faces/bartolina-sisa.jpg", initials:"BS", tags:["Indigenous Resistance","Rebellion","Leadership"], summary:"Bartolina Sisa fought Spanish colonial power and became a symbol of Indigenous women’s resistance.", body:"Bartolina Sisa’s story is a direct challenge to colonial and patriarchal erasure. She is remembered as an organiser and rebel leader, not as a passive companion to male resistance. Her memory is especially important for Indigenous women’s political dignity." },
-      { id:"micaela", name:"Micaela Bastidas", country:"Peru", continent:"South America", coords:[-72.88,-13.52], iso:"604", era:"Andean Rebel Organiser", image:"assets/faces/micaela-bastidas.jpg", initials:"MB", tags:["Organisation","Anti-colonial","Courage"], summary:"Micaela Bastidas co-led rebellion and is remembered for strategy, logistics and anti-colonial resistance.", body:"Micaela Bastidas is often overshadowed by Túpac Amaru II, but that is precisely why she matters. Her story restores the organising labour behind rebellion: intelligence, communication, logistics and political conviction." },
-      { id:"juana", name:"Juana Azurduy", country:"Argentina", continent:"South America", coords:[-65.20,-22.73], iso:"032", era:"Independence Fighter", image:"assets/faces/juana-azurduy.jpg", initials:"JA", tags:["Independence","Guerrilla","Liberation"], summary:"Juana Azurduy became a celebrated guerrilla leader in the South American wars of independence.", body:"Juana Azurduy’s story demonstrates women’s direct participation in wars of liberation. Her memory is useful because it resists the habit of presenting independence as a male-only political achievement." },
-      { id:"gaitana", name:"La Gaitana", country:"Colombia", continent:"South America", coords:[-75.28,2.93], iso:"170", era:"Indigenous Resistance Figure", image:"assets/faces/la-gaitana.jpg", initials:"LG", tags:["Indigenous Resistance","Legend","Justice"], summary:"La Gaitana is remembered as an Indigenous woman who organised resistance against Spanish colonisation.", body:"La Gaitana’s story is partially legendary, but symbolically direct: violence against family and community becomes organised resistance. The story should be framed as Indigenous anti-colonial memory rather than a simple revenge tale." },
-
-      { id:"nafanua", name:"Nafanua", country:"Samoa", continent:"Oceania", coords:[-172.10,-13.76], iso:"882", era:"Samoan War Goddess", image:"assets/faces/nafanua.jpg", initials:"NF", tags:["Myth","Authority","Sacred Power"], summary:"Nafanua is associated with female authority, sacred power and political legitimacy in Samoan tradition.", body:"Nafanua is primarily mythic, so she should not be treated as a rights activist. Her value is symbolic: she shows that female power can be sacred, martial and politically legitimising within cultural tradition." },
-      { id:"hinemoa", name:"Hinemoa", country:"Aotearoa / New Zealand", continent:"Oceania", coords:[176.25,-38.14], iso:"554", era:"Māori Love Legend", image:"assets/faces/hinemoa.jpg", initials:"HI", tags:["Choice","Love","Autonomy"], summary:"Hinemoa chooses love across social barriers, making her story useful for themes of female choice and autonomy.", body:"Hinemoa’s story is a weaker fit for political rights, but a useful fit for autonomy. Her active choice matters: she is not merely chosen; she chooses. In a map about women’s agency, that distinction is important." },
-      { id:"tarenorerer", name:"Tarenorerer", country:"Australia", continent:"Oceania", coords:[147.33,-42.88], iso:"036", era:"Tasmanian Aboriginal Resistance", image:"assets/faces/tarenorerer.jpg", initials:"TA", tags:["Resistance","Colonisation","Leadership"], summary:"Tarenorerer, also known as Walyer, is remembered for leading armed Aboriginal resistance in Tasmania.", body:"Tarenorerer’s story is grounded in colonial resistance and survival. She represents a woman using knowledge, language and tactical skill in a brutal colonial context. Her story should be told with care, not aestheticised as simple warrior glamour." },
-      { id:"naghol", name:"Naghol Origin Woman", country:"Vanuatu", continent:"Oceania", coords:[168.32,-16.28], iso:"548", era:"Land-diving Origin Legend", image:"assets/faces/naghol.jpg", initials:"NG", tags:["Escape","Bodily Autonomy","Legend"], summary:"The land-diving origin legend centres on a woman escaping an abusive husband by tying vines to her ankles.", body:"The Naghol origin story is not a simple empowerment tale, but it can be read as a story of bodily autonomy and survival. The careful interpretation is that folklore preserves both danger and ingenuity: a woman finds a way out when formal protection is absent." },
-      { id:"hikuleo", name:"Hikuleʻo", country:"Tonga", continent:"Oceania", coords:[-175.20,-21.18], iso:"776", era:"Tongan Sacred Power", image:"assets/faces/hikuleo.jpg", initials:"HK", tags:["Myth","Power","Authority"], summary:"Hikuleʻo traditions offer a symbolic frame for female sacred power and authority.", body:"Hikuleʻo is a mythological rather than rights-based figure. The story belongs in the project only if labelled honestly as symbolic female authority, not as a modern feminist campaign." }
+    const quotes = [
+      { text: "There is no limit to what we, as women, can accomplish.", author: "Michelle Obama" },
+      { text: "I raise up my voice — not so I can shout, but so that those without a voice can be heard.", author: "Malala Yousafzai" },
+      { text: "Women belong in all places where decisions are being made.", author: "Ruth Bader Ginsburg" },
+      { text: "I would rather be a rebel than a slave.", author: "Emmeline Pankhurst" },
+      { text: "Ain’t I a woman?", author: "Sojourner Truth" },
+      { text: "Freedom cannot be achieved unless women have been emancipated from all forms of oppression.", author: "Nelson Mandela" }
     ];
 
-    const continents = ["All", "Africa", "Asia", "Europe", "North America", "South America", "Oceania"];
-    let selectedContinent = "All";
-    let selectedStory = stories[0];
+    const stories = [
+      {id:"yaa",name:"Yaa Asantewaa",country:"Ghana",continent:"Africa",coords:[-1.02,7.95],iso:"288",era:"The Asante Queen",image:"assets/faces/yaa.svg",initials:"YA",tags:["Resistance","Leadership","Folklore"],summary:"In 1900, when British forces demanded the Golden Stool, Yaa Asantewaa rallied the Asante and led resistance.",body:"Yaa Asantewaa is remembered as a queen mother and strategist whose story blends history and cultural memory. She represents political authority, resistance to colonial domination and the refusal to surrender collective dignity."},
+      {id:"amina",name:"Queen Amina",country:"Nigeria",continent:"Africa",coords:[7.72,11.08],iso:"566",era:"Hausa Warrior Queen",image:"assets/faces/amina.svg",initials:"QA",tags:["Rule","Strategy","Legend"],summary:"Queen Amina of Zazzau is remembered as a formidable ruler whose story preserves female sovereignty.",body:"Amina’s memory survives through chronicles and oral tradition. She stands for female political power, command and the challenge to the idea that leadership in the precolonial state was solely male."},
+      {id:"mekatilili",name:"Mekatilili wa Menza",country:"Kenya",continent:"Africa",coords:[39.85,-3.63],iso:"404",era:"Giriama Resistance",image:"assets/faces/mekatilili.svg",initials:"MM",tags:["Anti-colonial","Oral Tradition","Leadership"],summary:"Mekatilili is remembered for mobilising Giriama resistance against colonial labour demands and cultural control.",body:"Mekatilili wa Menza is a powerful figure in Kenyan memory. Her story connects women’s agency to speech, ritual authority and resistance to cultural and political domination."},
+      {id:"agojie",name:"Agojie",country:"Benin",continent:"Africa",coords:[2.31,9.31],iso:"204",era:"Dahomey Women Warriors",image:"assets/faces/agojie.svg",initials:"AG",tags:["Warriors","Power","Complex History"],summary:"The Agojie were an all-female regiment of Dahomey remembered for discipline, training and battlefield power.",body:"The Agojie complicate easy empowerment narratives. They are evidence that women occupied elite military roles, but their world must be understood within the wider politics of the Dahomey kingdom."},
+      {id:"arawelo",name:"Queen Arawelo",country:"Somalia",continent:"Africa",coords:[46.19,5.15],iso:"706",era:"Somali Legendary Queen",image:"assets/faces/arawelo.svg",initials:"AR",tags:["Myth","Authority","Debate"],summary:"Arawelo is a contested legendary queen, interpreted as either feminist resistance or excessive power.",body:"Arawelo is valuable precisely because she is contested. Her story reveals how folklore can carry both admiration for women’s rule and social anxiety about it."},
 
-    const frame = document.getElementById("mapFrame");
-    const svg = d3.select("#worldMap");
+      {id:"mulan",name:"Hua Mulan",country:"China",continent:"Asia",coords:[104.19,35.86],iso:"156",era:"Ballad of Mulan",image:"assets/faces/mulan.svg",initials:"HM",tags:["Legend","Duty","Courage"],summary:"Mulan takes her father’s place in war, unsettling assumptions about gender and public duty.",body:"Mulan is not a modern rights activist, but her story is potent because it exposes the fragility of the idea that courage, duty and sacrifice belong naturally to men."},
+      {id:"trung",name:"Trưng Sisters",country:"Vietnam",continent:"Asia",coords:[105.83,21.03],iso:"704",era:"Rebellion Leaders",image:"assets/faces/trung-sisters.svg",initials:"TS",tags:["Rebellion","Sovereignty","Leadership"],summary:"The Trưng Sisters led rebellion against Han domination and became symbols of Vietnamese independence.",body:"The Trưng Sisters fuse female leadership with national freedom. Their story matters because it challenges the assumption that anti-imperial struggle is fundamentally masculine."},
+      {id:"lakshmibai",name:"Rani Lakshmibai",country:"India",continent:"Asia",coords:[78.57,25.45],iso:"356",era:"Queen of Jhansi",image:"assets/faces/rani-lakshmibai.svg",initials:"RL",tags:["Rebellion","Sovereignty","Courage"],summary:"Rani Lakshmibai is remembered as a queen who fought colonial annexation during the 1857 uprising.",body:"Lakshmibai’s memory lives through poetry and public legend. She represents sovereignty, maternal strength, political legitimacy and the refusal to accept colonial rule."},
+      {id:"tomoe",name:"Tomoe Gozen",country:"Japan",continent:"Asia",coords:[138.25,36.20],iso:"392",era:"Warrior of the Heike",image:"assets/faces/tomoe-gozen.svg",initials:"TG",tags:["Warrior","Legend","Honour"],summary:"Tomoe Gozen is remembered as a woman warrior associated with battlefield skill and martial honour.",body:"Tomoe Gozen sits between literature and history. Her symbolic power lies in demonstrating that courage, combat and honour were not exclusively male domains."},
+      {id:"gabriela",name:"Gabriela Silang",country:"Philippines",continent:"Asia",coords:[120.98,14.60],iso:"608",era:"Revolutionary Leader",image:"assets/faces/gabriela-silang.svg",initials:"GS",tags:["Revolt","Anti-colonial","Leadership"],summary:"Gabriela Silang took command of revolt and became a symbol of revolutionary female leadership.",body:"Gabriela Silang’s story is more than personal courage after loss. It represents a woman’s movement into command, organisation and public rebellion."},
+
+      {id:"boudicca",name:"Boudicca",country:"Britain",continent:"Europe",coords:[0.12,52.20],iso:"826",era:"Iceni Queen",image:"assets/faces/boudicca.svg",initials:"BO",tags:["Revolt","Justice","Sovereignty"],summary:"Boudicca led revolt against Roman rule after violence against her family and people.",body:"Boudicca’s story has been repeatedly retold and politicised, yet its central force remains clear: a woman refuses imperial humiliation and turns private injury into collective resistance."},
+      {id:"joan",name:"Joan of Arc",country:"France",continent:"Europe",coords:[2.21,46.23],iso:"250",era:"Saint and Soldier",image:"assets/faces/joan.svg",initials:"JA",tags:["Faith","War","Mythologised"],summary:"Joan of Arc became a symbol of courage, divine conviction and national liberation.",body:"Joan of Arc matters because she crossed class, gender and political boundaries. A peasant girl claimed authority and changed the course of history as remembered by later generations."},
+      {id:"grace",name:"Grace O’Malley",country:"Ireland",continent:"Europe",coords:[-9.06,53.80],iso:"372",era:"Pirate Queen",image:"assets/faces/grace-omalley.svg",initials:"GO",tags:["Sea Power","Autonomy","Leadership"],summary:"Grace O’Malley is remembered as a sea captain and clan leader who defended autonomy.",body:"Grace O’Malley’s legend is about command, negotiation and maritime power. She shows women’s authority in a domain usually imagined as male."},
+      {id:"maria",name:"María Pita",country:"Spain",continent:"Europe",coords:[-8.41,43.36],iso:"724",era:"Defender of A Coruña",image:"assets/faces/maria-pita.svg",initials:"MP",tags:["Defence","Civic Courage","Memory"],summary:"María Pita is remembered for defending A Coruña and becoming a symbol of civic courage.",body:"María Pita represents the ordinary woman transformed into a civic legend. She embodies public action, courage and communal defence."},
+      {id:"brites",name:"Brites de Almeida",country:"Portugal",continent:"Europe",coords:[-8.22,39.66],iso:"620",era:"The Baker of Aljubarrota",image:"assets/faces/brites.svg",initials:"BA",tags:["Folklore","Resistance","Working Woman"],summary:"Brites de Almeida is a legendary baker said to have fought invaders.",body:"Brites de Almeida’s appeal lies in her ordinariness. She is not remembered as elite, but as a working woman elevated by folklore into a national symbol."},
+
+      {id:"adelita",name:"La Adelita",country:"Mexico",continent:"North America",coords:[-102.55,23.63],iso:"484",era:"Soldadera Symbol",image:"assets/faces/adelita.svg",initials:"LA",tags:["Revolution","Song","Contested Memory"],summary:"La Adelita symbolises women’s participation in the Mexican Revolution, though often through romanticised memory.",body:"La Adelita stands for the soldaderas who fought, nursed, supplied and endured the revolution. The symbol is powerful, but it should not erase the hardship those women faced."},
+      {id:"nanny",name:"Nanny of the Maroons",country:"Jamaica",continent:"North America",coords:[-77.30,18.10],iso:"388",era:"Maroon Leader",image:"assets/faces/nanny.svg",initials:"NM",tags:["Freedom","Anti-slavery","Oral Tradition"],summary:"Nanny of the Maroons is remembered for guerrilla leadership and anti-slavery resistance.",body:"Nanny’s place in memory is central because it puts a Black woman at the heart of freedom, strategy and communal survival."},
+      {id:"tubman",name:"Harriet Tubman",country:"United States",continent:"North America",coords:[-76.08,38.88],iso:"840",era:"Moses of Her People",image:"assets/faces/harriet-tubman.svg",initials:"HT",tags:["Freedom","Abolition","Suffrage"],summary:"Harriet Tubman became a freedom legend through escape, rescue, abolitionist work and suffrage support.",body:"Tubman transformed survival into organised liberation. She represents movement, bodily autonomy, abolition and later women’s political voice."},
+      {id:"thanadelthur",name:"Thanadelthur",country:"Canada",continent:"North America",coords:[-96.82,58.77],iso:"124",era:"Dene Diplomat",image:"assets/faces/thanadelthur.svg",initials:"TH",tags:["Diplomacy","Peace","Survival"],summary:"Thanadelthur is remembered as a Dene woman who escaped captivity and became a diplomat and peace-maker.",body:"Thanadelthur expands the frame beyond warriors. Her story foregrounds translation, survival and political intelligence."},
+      {id:"anacaona",name:"Anacaona",country:"Haiti",continent:"North America",coords:[-72.29,18.97],iso:"332",era:"Taíno Cacica",image:"assets/faces/anacaona.svg",initials:"AN",tags:["Indigenous Rule","Colonial Violence","Memory"],summary:"Anacaona is remembered as a Taíno ruler and cultural figure under colonial violence.",body:"Anacaona links women’s leadership to Indigenous sovereignty and the trauma of conquest. Her memory is both political and poetic."},
+
+      {id:"dandara",name:"Dandara dos Palmares",country:"Brazil",continent:"South America",coords:[-36.53,-9.17],iso:"076",era:"Palmares Warrior",image:"assets/faces/dandara.svg",initials:"DP",tags:["Anti-slavery","Resistance","Quilombo"],summary:"Dandara is remembered as a warrior associated with Palmares and Afro-Brazilian resistance.",body:"Dandara’s story is symbolically powerful because it places a Black woman within the defence of freedom and autonomous community."},
+      {id:"bartolina",name:"Bartolina Sisa",country:"Bolivia",continent:"South America",coords:[-68.15,-16.50],iso:"068",era:"Aymara Rebel Leader",image:"assets/faces/bartolina-sisa.svg",initials:"BS",tags:["Indigenous Resistance","Rebellion","Leadership"],summary:"Bartolina Sisa fought Spanish colonial power and became a symbol of Indigenous women’s resistance.",body:"Bartolina Sisa is crucial because she resists both colonial and patriarchal erasure. She is remembered as organiser, leader and rebel in her own right."},
+      {id:"micaela",name:"Micaela Bastidas",country:"Peru",continent:"South America",coords:[-72.88,-13.52],iso:"604",era:"Andean Rebel Organiser",image:"assets/faces/micaela-bastidas.svg",initials:"MB",tags:["Organisation","Anti-colonial","Courage"],summary:"Micaela Bastidas co-led rebellion and is remembered for strategy, logistics and resolve.",body:"Micaela Bastidas restores the often-hidden organising labour behind rebellion. Her story foregrounds coordination, intelligence and political conviction."},
+      {id:"juana",name:"Juana Azurduy",country:"Argentina",continent:"South America",coords:[-65.20,-22.73],iso:"032",era:"Independence Fighter",image:"assets/faces/juana-azurduy.svg",initials:"JA",tags:["Independence","Guerrilla","Liberation"],summary:"Juana Azurduy became a celebrated guerrilla leader in the South American wars of independence.",body:"Juana Azurduy matters because she breaks the habit of telling independence struggles as if they were male-only achievements."},
+      {id:"gaitana",name:"La Gaitana",country:"Colombia",continent:"South America",coords:[-75.28,2.93],iso:"170",era:"Indigenous Resistance Figure",image:"assets/faces/la-gaitana.svg",initials:"LG",tags:["Indigenous Resistance","Legend","Justice"],summary:"La Gaitana is remembered as an Indigenous woman who organised resistance against colonisation.",body:"La Gaitana’s story is part historical memory, part legend. Its symbolic force lies in turning violence against family and community into organised resistance."},
+
+      {id:"nafanua",name:"Nafanua",country:"Samoa",continent:"Oceania",coords:[-172.10,-13.76],iso:"882",era:"Samoan War Goddess",image:"assets/faces/nafanua.svg",initials:"NF",tags:["Myth","Authority","Sacred Power"],summary:"Nafanua is associated with female authority, sacred power and political legitimacy.",body:"Nafanua is primarily mythic, so she should be read as symbolic female authority rather than a modern rights campaigner."},
+      {id:"hinemoa",name:"Hinemoa",country:"Aotearoa / New Zealand",continent:"Oceania",coords:[176.25,-38.14],iso:"554",era:"Māori Love Legend",image:"assets/faces/hinemoa.svg",initials:"HI",tags:["Choice","Autonomy","Love"],summary:"Hinemoa chooses love across social barriers, making her story useful for themes of female choice and autonomy.",body:"Hinemoa is not a direct rights figure, but her story remains useful because she actively chooses, rather than passively being chosen."},
+      {id:"tarenorerer",name:"Tarenorerer",country:"Australia",continent:"Oceania",coords:[147.33,-42.88],iso:"036",era:"Tasmanian Aboriginal Resistance",image:"assets/faces/tarenorerer.svg",initials:"TA",tags:["Resistance","Colonisation","Leadership"],summary:"Tarenorerer, also known as Walyer, is remembered for leading armed Aboriginal resistance in Tasmania.",body:"Tarenorerer’s story is grounded in survival, tactical skill and colonial resistance. It should be told with seriousness, not romanticised as spectacle."},
+      {id:"naghol",name:"Naghol Origin Woman",country:"Vanuatu",continent:"Oceania",coords:[168.32,-16.28],iso:"548",era:"Land-diving Origin Legend",image:"assets/faces/naghol.svg",initials:"NG",tags:["Escape","Autonomy","Legend"],summary:"The land-diving origin legend centres on a woman escaping an abusive husband by tying vines to her ankles.",body:"This legend is best read as a story of bodily autonomy and survival in a context where formal protection is absent."},
+      {id:"hikuleo",name:"Hikuleʻo",country:"Tonga",continent:"Oceania",coords:[-175.20,-21.18],iso:"776",era:"Tongan Sacred Power",image:"assets/faces/hikuleo.svg",initials:"HK",tags:["Myth","Power","Authority"],summary:"Hikuleʻo traditions offer a symbolic frame for female sacred power and authority.",body:"Hikuleʻo belongs here only if honestly framed as symbolic authority, not as a modern feminist rights story."}
+    ];
+
+    const continents = ["All","Africa","Asia","Europe","North America","South America","Oceania"];
+    let selectedContinent = "All";
+    let selectedStory = null;
+
+    const svg = d3.select("#map");
     const markerLayer = document.getElementById("markerLayer");
-    const filters = document.getElementById("filters");
-    const miniList = document.getElementById("miniList");
+    const filtersEl = document.getElementById("filters");
 
     const storyCard = document.getElementById("storyCard");
-    const closeCard = document.getElementById("closeCard");
-    const cardImg = document.getElementById("cardImg");
-    const cardEra = document.getElementById("cardEra");
-    const cardName = document.getElementById("cardName");
-    const cardLocation = document.getElementById("cardLocation");
-    const cardSummary = document.getElementById("cardSummary");
-    const cardTags = document.getElementById("cardTags");
-    const readFull = document.getElementById("readFull");
+    const closeStory = document.getElementById("closeStory");
+    const storyImage = document.getElementById("storyImage");
+    const storyEyebrow = document.getElementById("storyEyebrow");
+    const storyName = document.getElementById("storyName");
+    const storyLoc = document.getElementById("storyLoc");
+    const storySummary = document.getElementById("storySummary");
+    const storyTags = document.getElementById("storyTags");
+    const openModalBtn = document.getElementById("openModalBtn");
 
-    const fullLayer = document.getElementById("fullLayer");
-    const closeLayer = document.getElementById("closeLayer");
-    const fullEra = document.getElementById("fullEra");
-    const fullName = document.getElementById("fullName");
-    const fullLocation = document.getElementById("fullLocation");
-    const fullBody = document.getElementById("fullBody");
+    const storyModal = document.getElementById("storyModal");
+    const closeModal = document.getElementById("closeModal");
+    const modalEyebrow = document.getElementById("modalEyebrow");
+    const modalTitle = document.getElementById("modalTitle");
+    const modalLoc = document.getElementById("modalLoc");
+    const modalBody = document.getElementById("modalBody");
 
-    function normaliseIso(id) { return String(id).padStart(3, "0"); }
-    function visibleStories() {
-      if (selectedContinent === "All") return stories;
-      return stories.filter(d => d.continent === selectedContinent);
+    const quoteText = document.getElementById("quoteText");
+    const quoteAuthor = document.getElementById("quoteAuthor");
+
+    function visibleStories(){
+      return selectedContinent === "All"
+        ? stories
+        : stories.filter(d => d.continent === selectedContinent);
     }
 
-    function makeFilters() {
-      filters.innerHTML = "";
+    function normaliseIso(id){
+      return String(id).padStart(3, "0");
+    }
+
+    function createFilters(){
+      filtersEl.innerHTML = "";
       continents.forEach(continent => {
-        const button = document.createElement("button");
-        button.className = `filter ${continent === selectedContinent ? "active" : ""}`;
-        button.textContent = continent;
-        button.addEventListener("click", () => {
+        const btn = document.createElement("button");
+        btn.className = `filter-btn ${continent === selectedContinent ? "active" : ""}`;
+        btn.textContent = continent;
+        btn.addEventListener("click", () => {
           selectedContinent = continent;
-          makeFilters();
-          render();
-          renderMiniList();
+          createFilters();
+          renderMap();
+          if (selectedStory && selectedStory.continent !== selectedContinent && selectedContinent !== "All"){
+            hideStory();
+          }
         });
-        filters.appendChild(button);
+        filtersEl.appendChild(btn);
       });
     }
 
-    function renderMiniList() {
-      miniList.innerHTML = "";
-      visibleStories().forEach(story => {
-        const item = document.createElement("button");
-        item.className = "mini-item";
-        item.innerHTML = `
-          <div class="mini-avatar">${story.initials}</div>
-          <div>
-            <strong>${story.name}</strong>
-            <span>${story.country} · ${story.continent}</span>
-          </div>
-        `;
-        item.addEventListener("click", () => openStory(story));
-        miniList.appendChild(item);
-      });
-    }
-
-    function openStory(story) {
+    function openStory(story){
       selectedStory = story;
-      cardImg.src = story.image;
-      cardImg.alt = story.name;
-      cardEra.textContent = story.era;
-      cardName.textContent = story.name;
-      cardLocation.textContent = `📍 ${story.country}`;
-      cardSummary.textContent = story.summary;
-      cardTags.innerHTML = story.tags.map((tag, index) => {
-        const colour = index === 0 ? "blue" : index === 1 ? "purple" : index === 2 ? "green" : "";
-        return `<span class="tag ${colour}">${tag}</span>`;
-      }).join("");
+      storyImage.src = story.image;
+      storyImage.alt = story.name;
+      storyEyebrow.textContent = story.era;
+      storyName.textContent = story.name;
+      storyLoc.textContent = `📍 ${story.country} · ${story.continent}`;
+      storySummary.textContent = story.summary;
+      storyTags.innerHTML = story.tags.map(tag => `<span class="tag">${tag}</span>`).join("");
       storyCard.classList.add("open");
     }
 
-    function openFullStory(story) {
-      fullEra.textContent = story.era;
-      fullName.textContent = story.name;
-      fullLocation.textContent = `📍 ${story.country} · ${story.continent}`;
-      fullBody.textContent = story.body;
-      fullLayer.classList.add("open");
+    function hideStory(){
+      storyCard.classList.remove("open");
     }
 
-    closeCard.addEventListener("click", () => storyCard.classList.remove("open"));
-    readFull.addEventListener("click", () => openFullStory(selectedStory));
-    closeLayer.addEventListener("click", () => fullLayer.classList.remove("open"));
-    fullLayer.addEventListener("click", event => {
-      if (event.target === fullLayer) fullLayer.classList.remove("open");
+    function openModal(){
+      if(!selectedStory) return;
+      modalEyebrow.textContent = selectedStory.era;
+      modalTitle.textContent = selectedStory.name;
+      modalLoc.textContent = `📍 ${selectedStory.country} · ${selectedStory.continent}`;
+      modalBody.textContent = selectedStory.body;
+      storyModal.classList.add("open");
+    }
+
+    closeStory.addEventListener("click", hideStory);
+    openModalBtn.addEventListener("click", openModal);
+    closeModal.addEventListener("click", () => storyModal.classList.remove("open"));
+    storyModal.addEventListener("click", (e) => {
+      if (e.target === storyModal) storyModal.classList.remove("open");
     });
 
-    function createMarker(story, x, y) {
-      const pin = document.createElement("div");
-      pin.className = "story-pin";
-      pin.style.left = `${x}px`;
-      pin.style.top = `${y}px`;
+    function startQuoteRotation(){
+      let index = 0;
 
-      pin.innerHTML = `
-        <button class="portrait-button" aria-label="Open story for ${story.name}">
-          <img
-            src="${story.image}"
-            alt="${story.name}"
-            onerror="this.style.display='none'; this.nextElementSibling.style.display='grid';"
-          />
-          <span class="fallback-face">${story.initials}</span>
-        </button>
-        <div class="pin-label">
-          <strong>${story.name}</strong>
-          <span>${story.country}</span>
-        </div>
-      `;
+      function showQuote(i){
+        quoteText.classList.remove("show");
+        quoteAuthor.classList.remove("show");
 
-      pin.querySelector("button").addEventListener("click", () => openStory(story));
-      markerLayer.appendChild(pin);
+        setTimeout(() => {
+          quoteText.textContent = `“${quotes[i].text}”`;
+          quoteAuthor.textContent = `— ${quotes[i].author}`;
+          quoteText.classList.add("show");
+          quoteAuthor.classList.add("show");
+        }, 350);
+      }
+
+      showQuote(index);
+
+      setInterval(() => {
+        quoteText.classList.remove("show");
+        quoteAuthor.classList.remove("show");
+
+        setTimeout(() => {
+          index = (index + 1) % quotes.length;
+          quoteText.textContent = `“${quotes[index].text}”`;
+          quoteAuthor.textContent = `— ${quotes[index].author}`;
+          quoteText.classList.add("show");
+          quoteAuthor.classList.add("show");
+        }, 1000);
+      }, 8000);
     }
 
-    async function render() {
+    async function renderMap(){
+      const frame = document.querySelector(".frame");
       const width = frame.clientWidth;
       const height = frame.clientHeight;
 
@@ -830,15 +851,16 @@
       svg.attr("viewBox", `0 0 ${width} ${height}`);
 
       const projection = d3.geoNaturalEarth1()
-        .fitExtent([[30, 72], [width - 30, height - 70]], { type: "Sphere" });
+        .fitExtent([[26, 110], [width - 26, height - 110]], { type: "Sphere" });
 
       const path = d3.geoPath(projection);
+      const graticule = d3.geoGraticule10();
+
       const world = await d3.json("https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json");
       const countries = topojson.feature(world, world.objects.countries).features;
 
-      const active = visibleStories();
-      const activeIso = new Set(active.map(d => d.iso));
-      const graticule = d3.geoGraticule10();
+      const visible = visibleStories();
+      const activeIso = new Set(visible.map(d => d.iso));
 
       svg.append("path")
         .datum(graticule)
@@ -849,32 +871,39 @@
         .selectAll("path")
         .data(countries)
         .join("path")
-        .attr("class", d => activeIso.has(normaliseIso(d.id)) ? "country highlight" : "country")
+        .attr("class", d => activeIso.has(normaliseIso(d.id)) ? "country active" : "country")
         .attr("d", path);
 
-      const dotLayer = svg.append("g");
-
-      active.forEach(story => {
+      visible.forEach(story => {
         const [x, y] = projection(story.coords);
 
-        dotLayer.append("circle")
-          .attr("class", "country-dot")
-          .attr("cx", x)
-          .attr("cy", y)
-          .attr("r", 5.5);
+        const marker = document.createElement("div");
+        marker.className = "marker";
+        marker.style.left = `${x}px`;
+        marker.style.top = `${y}px`;
 
-        createMarker(story, x, y);
+        marker.innerHTML = `
+          <div class="pulse"></div>
+          <button class="marker-btn" aria-label="${story.name}">
+            <img src="${story.image}" alt="${story.name}" onerror="this.style.display='none'; this.nextElementSibling.style.display='grid';">
+            <span class="fallback">${story.initials}</span>
+          </button>
+          <div class="marker-label">${story.name}</div>
+        `;
+
+        marker.querySelector("button").addEventListener("click", () => openStory(story));
+        markerLayer.appendChild(marker);
       });
     }
 
-    makeFilters();
-    renderMiniList();
-    render().then(() => openStory(stories[0]));
+    createFilters();
+    startQuoteRotation();
+    renderMap();
 
-    let resizeTimer;
+    let resizeTimer = null;
     window.addEventListener("resize", () => {
       clearTimeout(resizeTimer);
-      resizeTimer = setTimeout(render, 140);
+      resizeTimer = setTimeout(renderMap, 120);
     });
   </script>
 </body>
